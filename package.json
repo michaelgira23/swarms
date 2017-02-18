@@ -1,0 +1,52 @@
+{
+  "name": "swarms",
+  "version": "0.0.0",
+  "description": "The ultimate node.js library for controlling Bitcraze Crazyflie 2.0 drones",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "tslint \"src/**/*.ts\"",
+    "tsc": "tsc",
+    "tsc:watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelgira23/swarms.git"
+  },
+  "keywords": [
+    "crazyflie",
+    "crazyflie 2.0",
+    "bitcraze",
+    "crazyradio",
+    "drones",
+    "quadcopter",
+    "nanocopter",
+    "swarms",
+    "world",
+    "domination"
+  ],
+  "author": {
+    "name": "Michael Gira",
+    "email": "contact@michaelgira.me",
+    "url": "https://michaelgira.me"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michaelgira23/swarms/issues"
+  },
+  "homepage": "https://github.com/michaelgira23/swarms#readme",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "usb": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.52",
+    "@types/node": "^7.0.5",
+    "@types/usb": "^1.1.2",
+    "tslint": "^4.4.2",
+    "typescript": "^2.1.6"
+  }
+}
