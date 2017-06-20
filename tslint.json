@@ -1,13 +1,20 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rules": {
-        "indent": [true, "tabs"],
-        "quotemark": [true, "single", "avoid-escape"],
-        "trailing-comma": [true, { "multiline": "never", "singleline": "never" }]
-    },
-    "rulesDirectory": []
+	"defaultSeverity": "error",
+	"extends": [
+		"tslint:recommended"
+	],
+	"jsRules": {},
+	"rules": {
+		"arrow-parens": [true, "ban-single-arg-parens"],
+		"indent": [true, "tabs"],
+		"interface-name": [true, "never-prefix"],
+		"member-access": [true, "no-public"],
+		"member-ordering": [true, "fields-first"],
+		"no-bitwise": false,
+		"object-literal-sort-keys": false,
+		"quotemark": [true, "single", "avoid-escape"],
+		"semicolon": [true, "always"],
+		"trailing-comma": [true, { "multiline": "never", "singleline": "never" }]
+	},
+	"rulesDirectory": []
 }
