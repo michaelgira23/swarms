@@ -57,6 +57,10 @@ export class Crazyradio {
 		this.initialized = true;
 	}
 
+	/**
+	 * Configure new options
+	 */
+
 	async configure(options: CrazyradioOptions) {
 		// Default options
 		options = Object.assign({}, defaultOptions, this.options, options);
