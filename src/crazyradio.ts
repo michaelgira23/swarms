@@ -2,6 +2,7 @@ import CONSTANTS from './constants';
 
 import * as _ from 'lodash';
 import * as usb from 'usb';
+import { promisify } from 'util';
 
 export class Crazyradio {
 
@@ -66,6 +67,38 @@ export class Crazyradio {
 		options = Object.assign({}, defaultOptions, this.options, options);
 
 		/** @TODO: Actually do something */
+	}
+
+	/**
+	 * Close the dongle
+	 */
+
+	close() {
+		return promisify(this.interface.release)()
+			.then(() => {
+				this.device.close();
+				this.initialized = false;
+			});
+	}
+
+	private sendVendorSetup(request: number, value: number, index: number, data: Buffer) {
+		return promisify(this.device.controlTransfer)(
+			CONSTANTS.CRAZYRADIO.VENDOR_REQUESTS.BM_REQUEST_TYPE,
+			request,
+			value,
+			index,
+			data
+		);
+	}
+
+	private getVendorSetup(request: number, value: number, index: number, length: number) {
+		return promisify(this.device.controlTransfer)(
+			CONSTANTS.CRAZYRADIO.VENDOR_REQUESTS.BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,
+			request,
+			value,
+			index,
+			length
+		);
 	}
 
 	/**

@@ -41,3 +41,9 @@ Install usb.js normally using `npm install` then remove the slashes again to rev
 ## Compiling
 
 This project uses TypeScript. To run locally, download all dev dependencies and run `npm run ts` to compile. During development, run `npm run ts:watch` to compile the TypeScript automagically when it detects any changes of the source files.
+
+# Acknowledgments
+
+Developing this library, the following references were used:
+- [Bitcraze team's `crazyflie-lib-python` library](https://github.com/bitcraze/crazyflie-lib-python)
+- [C J Silverio's `aerogel` library](https://github.com/ceejbot/aerogel)
