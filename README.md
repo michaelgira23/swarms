@@ -44,6 +44,6 @@ This project uses TypeScript. To run locally, download all dev dependencies and 
 
 # Acknowledgments
 
-Developing this library, the following references were used:
+Special thanks to the following people, whose libraries were used as a reference:
 - [Bitcraze team's `crazyflie-lib-python` library](https://github.com/bitcraze/crazyflie-lib-python)
 - [C J Silverio's `aerogel` library](https://github.com/ceejbot/aerogel)
