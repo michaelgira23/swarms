@@ -8,7 +8,7 @@ export class Crazyradio {
 
 	private initialized = false;
 	// Crazyradio options
-	options: CrazyradioOptions;
+	options: CrazyradioOptions = defaultOptions;
 	// Firmware version of Crazyradio
 	version: number;
 
@@ -105,7 +105,6 @@ export class Crazyradio {
 		if (0 > channel || channel > 125) {
 			return Promise.reject('Channel out of range!');
 		}
-
 		this.options.channel = channel;
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_CHANNEL, channel);
 	}
@@ -115,8 +114,75 @@ export class Crazyradio {
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ADDRESS, 0, 0, address);
 	}
 
-	setDataRate(dataRate: DATA_RATES) {
-		this.
+	setDataRate(rate: DATA_RATES) {
+		if (!(rate in DATA_RATES)) {
+			return Promise.reject('Data rate out of range!');
+		}
+		this.options.dataRate = rate;
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_DATA_RATE, rate);
+	}
+
+	setRadioPower(power: RADIO_POWERS) {
+		if (!(power in RADIO_POWERS)) {
+			return Promise.reject('Radio power out of range!');
+		}
+		this.options.radioPower = power;
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_POWER, power);
+	}
+
+	setAutoRetryDelay(delay: number) {
+		this.options.ard = delay;
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ARD, delay);
+	}
+
+	setAutoRetryDelayMicroseconds(microseconds: number) {
+		/*
+		 * Auto Retransmit Delay in microseconds
+		 * 0000 - Wait 250uS
+		 * 0001 - Wait 500uS
+		 * 0010 - Wait 750uS
+		 * ........
+		 * 1111 - Wait 4000uS
+		 */
+
+		let time = Math.floor(microseconds / 250);
+
+		// Time limits
+		if (time < 0) {
+			time = 0;
+		}
+		if (time > 0xF) {
+			time = 0xF;
+		}
+
+		return this.setAutoRetryDelay(time);
+	}
+
+	setAutoRetryDelayBytes(bytes: number) {
+		return this.setAutoRetryDelay(0x80 | bytes);
+	}
+
+	setAutoRetryCount(count: number) {
+		if (0 >= count || count <= 15) {
+			return Promise.reject('Retry count out of range!');
+		}
+		this.options.arc = count;
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ARC, count);
+	}
+
+	setAckEnable(active: boolean) {
+		this.options.ackEnable = active;
+		return this.sendVendorSetup(VENDOR_REQUESTS.ACK_ENABLE, (active ? 1 : 0));
+	}
+
+	setContCarrier(active: boolean) {
+		this.options.contCarrier = active;
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_CONT_CARRIER, (active ? 1 : 0));
+	}
+
+	scanChannels(start = 0, stop = 125, packet = BUFFERS.SOMETHING) {
+		return this.sendVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, start, stop, packet)
+			.then(() => this.getVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, 0, 0, 64));
 	}
 
 	/**

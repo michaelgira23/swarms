@@ -20,15 +20,13 @@ export const CRAZYRADIO = {
 	PID: 0x7777
 };
 
-export const enum DATA_RATES {
+export enum DATA_RATES {
 	'250K',
 	'1M',
 	'2M'
 }
 
-// export function
-
-export const enum RADIO_POWERS {
+export enum RADIO_POWERS {
 	'-18dBm',
 	'-12dBm',
 	'-6dBm',
