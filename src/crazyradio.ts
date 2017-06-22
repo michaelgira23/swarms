@@ -1,8 +1,15 @@
-import { BUFFERS, CRAZYRADIO, DATA_RATES, RADIO_POWERS, VENDOR_REQUESTS } from './constants';
+import {
+	BUFFERS,
+	CRAZYRADIO,
+	DATA_RATES,
+	GET_DATA_RATE,
+	GET_RADIO_POWER,
+	RADIO_POWERS,
+	VENDOR_REQUESTS
+} from './constants';
 
 import * as _ from 'lodash';
 import * as usb from 'usb';
-import { promisify } from 'util';
 
 export class Crazyradio {
 
@@ -74,36 +81,60 @@ export class Crazyradio {
 	 */
 
 	close() {
-		return promisify(this.interface.release)()
-			.then(() => {
+		return new Promise((resolve, reject) => {
+			this.interface.release(err => {
+				if (err) {
+					reject(err);
+					return;
+				}
 				this.device.close();
 				this.initialized = false;
+				resolve();
+			});
+		});
+	}
+
+	/**
+	 * Scan for any nearby Crazyflies
+	 */
+
+	async findDrones() {
+		try {
+			await this.setAckRetryCount(1);
+			let drones: string[] = [];
+			for (const rate of Object.keys(DATA_RATES)) {
+				drones = drones.concat(await this.scanRange(DATA_RATES[rate]));
+			}
+			return Promise.resolve(drones);
+		} catch (err) {
+			return Promise.reject(err);
+		}
+	}
+
+	scanRange(dataRate: number): Promise<string[]> {
+		const dataRateKey = GET_DATA_RATE(dataRate);
+		if (dataRateKey === null) {
+			return Promise.reject(`Invalid data rate! (${dataRate})`);
+		}
+
+		return this.setDataRate(dataRate)
+			.then(() => this.scanChannels())
+			.then((drones: Buffer) => {
+				const uris = [];
+				for (const drone of drones) {
+					uris.push(`radio://1/${drone}/${dataRateKey}`);
+				}
+				return uris;
 			});
 	}
 
-	private sendVendorSetup(request: number, value: number, index: number = 0, data: Buffer | number = BUFFERS.NOTHING) {
-		return promisify(this.device.controlTransfer)(
-			VENDOR_REQUESTS.BM_REQUEST_TYPE,
-			request,
-			value,
-			index,
-			data
-		);
-	}
-
-	private getVendorSetup(request: number, value: number, index: number, length: number) {
-		return promisify(this.device.controlTransfer)(
-			VENDOR_REQUESTS.BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,
-			request,
-			value,
-			index,
-			length
-		);
-	}
+	/**
+	 * Configuration functions
+	 */
 
 	setRadioChannel(channel: number) {
 		if (0 > channel || channel > 125) {
-			return Promise.reject('Channel out of range!');
+			return Promise.reject(`Channel out of range! (${channel})`);
 		}
 		this.options.channel = channel;
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_CHANNEL, channel);
@@ -114,28 +145,29 @@ export class Crazyradio {
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ADDRESS, 0, 0, address);
 	}
 
-	setDataRate(rate: DATA_RATES) {
-		if (!(rate in DATA_RATES)) {
-			return Promise.reject('Data rate out of range!');
+	setDataRate(rate: number) {
+		if (GET_DATA_RATE(rate) === null) {
+			return Promise.reject(`Data rate out of range! (${rate})`);
 		}
 		this.options.dataRate = rate;
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_DATA_RATE, rate);
 	}
 
-	setRadioPower(power: RADIO_POWERS) {
-		if (!(power in RADIO_POWERS)) {
-			return Promise.reject('Radio power out of range!');
+	setRadioPower(power: number) {
+		if (GET_RADIO_POWER(power) === null) {
+			return Promise.reject(`Radio power out of range! (${power})`);
 		}
 		this.options.radioPower = power;
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_POWER, power);
 	}
 
-	setAutoRetryDelay(delay: number) {
+	setAckRetryDelay(delay: number) {
 		this.options.ard = delay;
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ARD, delay);
 	}
 
-	setAutoRetryDelayMicroseconds(microseconds: number) {
+	setAckRetryDelayMicroseconds(microseconds: number) {
+
 		/*
 		 * Auto Retransmit Delay in microseconds
 		 * 0000 - Wait 250uS
@@ -155,16 +187,16 @@ export class Crazyradio {
 			time = 0xF;
 		}
 
-		return this.setAutoRetryDelay(time);
+		return this.setAckRetryDelay(time);
 	}
 
-	setAutoRetryDelayBytes(bytes: number) {
-		return this.setAutoRetryDelay(0x80 | bytes);
+	setAckRetryDelayBytes(bytes: number) {
+		return this.setAckRetryDelay(0x80 | bytes);
 	}
 
-	setAutoRetryCount(count: number) {
-		if (0 >= count || count <= 15) {
-			return Promise.reject('Retry count out of range!');
+	setAckRetryCount(count: number) {
+		if (0 > count || count > 15) {
+			return Promise.reject(`Retry count out of range! (${count})`);
 		}
 		this.options.arc = count;
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ARC, count);
@@ -183,6 +215,44 @@ export class Crazyradio {
 	scanChannels(start = 0, stop = 125, packet = BUFFERS.SOMETHING) {
 		return this.sendVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, start, stop, packet)
 			.then(() => this.getVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, 0, 0, 64));
+	}
+
+	private sendVendorSetup(request: number, value: number, index: number = 0, data: Buffer | number = BUFFERS.NOTHING) {
+		return new Promise((resolve, reject) => {
+			this.device.controlTransfer(
+				VENDOR_REQUESTS.BM_REQUEST_TYPE,
+				request,
+				value,
+				index,
+				data,
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(res);
+					}
+				}
+			);
+		});
+	}
+
+	private getVendorSetup(request: number, value: number, index: number, length: number) {
+		return new Promise((resolve, reject) => {
+			this.device.controlTransfer(
+				VENDOR_REQUESTS.BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,
+				request,
+				value,
+				index,
+				length,
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(res);
+					}
+				}
+			);
+		});
 	}
 
 	/**

@@ -20,17 +20,35 @@ export const CRAZYRADIO = {
 	PID: 0x7777
 };
 
-export enum DATA_RATES {
-	'250K',
-	'1M',
-	'2M'
+export const DATA_RATES: SortaEnum = {
+	'250K' : 0,
+	'1M'   : 1,
+	'2M'   : 2
+};
+
+export function GET_DATA_RATE(targetRate: number) {
+	for (const rate of Object.keys(DATA_RATES)) {
+		if (DATA_RATES[rate] === targetRate) {
+			return rate;
+		}
+	}
+	return null;
 }
 
-export enum RADIO_POWERS {
-	'-18dBm',
-	'-12dBm',
-	'-6dBm',
-	'0dBm'
+export const RADIO_POWERS: SortaEnum = {
+	'-18dBm' : 0,
+	'-12dBm' : 1,
+	'-6dBm'  : 2,
+	'0dBm'   : 3
+};
+
+export function GET_RADIO_POWER(targetPower: number) {
+	for (const power of Object.keys(RADIO_POWERS)) {
+		if (RADIO_POWERS[power] === targetPower) {
+			return power;
+		}
+	}
+	return null;
 }
 
 export const VENDOR_REQUESTS = {
@@ -47,3 +65,11 @@ export const VENDOR_REQUESTS = {
 	SCAN_CHANNELS     : 0x21,
 	LAUNCH_BOOTLOADER : 0xFF
 };
+
+/**
+ * Because we need a table of fixed values that we can also look up the index
+ */
+
+export interface SortaEnum {
+	[rate: string]: number;
+}

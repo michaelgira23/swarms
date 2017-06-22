@@ -10,7 +10,9 @@ async function main() {
 	const radio = new swarms.Crazyradio();
 	try {
 		await radio.init();
+		const drones = await radio.findDrones();
+		console.log('Nearby drones:', drones);
 	} catch (err) {
-		console.log('There was a problem setting up the Crazyradio!', err);
+		console.log('Uh oh!', err);
 	}
 }
