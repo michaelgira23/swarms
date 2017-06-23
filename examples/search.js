@@ -11,7 +11,7 @@ async function main() {
 	try {
 		await radio.init();
 		const drones = await radio.findDrones();
-		console.log('Nearby drones:', drones);
+		console.log(`Nearby drones: ${drones}`);
 	} catch (err) {
 		console.log('Uh oh!', err);
 	}

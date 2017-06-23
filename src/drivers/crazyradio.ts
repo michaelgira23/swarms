@@ -6,11 +6,15 @@ import {
 	GET_RADIO_POWER,
 	RADIO_POWERS,
 	VENDOR_REQUESTS
-} from './constants';
-import { Uri } from './uri';
+} from '../constants';
+import { Uri } from '../uri';
 
 import * as _ from 'lodash';
 import * as usb from 'usb';
+
+/**
+ * Class for controlling the Crazyradio
+ */
 
 export class Crazyradio {
 
@@ -23,7 +27,9 @@ export class Crazyradio {
 	// USB stuff
 	private device: usb.Device;
 	private interface: usb.Interface;
+	// Endpoint in the IN direction (dongle --> PC)
 	private inEndpoint: usb.InEndpoint;
+	// Endpoint in the OUT direction (PC --> dongle)
 	private outEndpoint: usb.OutEndpoint;
 
 	/**

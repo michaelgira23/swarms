@@ -1,5 +1,5 @@
 import { Crazyflie } from './crazyflie';
-import { Crazyradio } from './crazyradio';
+import { Crazyradio } from './drivers/crazyradio';
 
 export {
 	Crazyflie,
