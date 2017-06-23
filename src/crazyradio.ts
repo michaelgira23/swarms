@@ -7,6 +7,7 @@ import {
 	RADIO_POWERS,
 	VENDOR_REQUESTS
 } from './constants';
+import { Uri } from './uri';
 
 import * as _ from 'lodash';
 import * as usb from 'usb';
@@ -20,7 +21,7 @@ export class Crazyradio {
 	version: number;
 
 	// USB stuff
-	private device: usb.Device = null;
+	private device: usb.Device;
 	private interface: usb.Interface;
 	private inEndpoint: usb.InEndpoint;
 	private outEndpoint: usb.OutEndpoint;
@@ -69,7 +70,7 @@ export class Crazyradio {
 	 * Configure new options
 	 */
 
-	async configure(options: CrazyradioOptions) {
+	configure(options: CrazyradioOptions) {
 		// Default options
 		options = Object.assign({}, defaultOptions, this.options, options);
 
@@ -108,7 +109,7 @@ export class Crazyradio {
 	async findDrones() {
 		try {
 			await this.setAckRetryCount(1);
-			let drones: string[] = [];
+			let drones: Uri[] = [];
 			for (const rate of Object.keys(DATA_RATES)) {
 				drones = drones.concat(await this.scanRange(DATA_RATES[rate]));
 			}
@@ -122,18 +123,13 @@ export class Crazyradio {
 	 * Scan for any drones on a specific data rate
 	 */
 
-	scanRange(dataRate: number): Promise<string[]> {
-		const dataRateKey = GET_DATA_RATE(dataRate);
-		if (dataRateKey === null) {
-			return Promise.reject(`Invalid data rate! (${dataRate})`);
-		}
-
+	scanRange(dataRate: number): Promise<Uri[]> {
 		return this.setDataRate(dataRate)
 			.then(() => this.scanChannels())
 			.then((drones: Buffer) => {
 				const uris = [];
 				for (const drone of drones) {
-					uris.push(`radio://1/${drone}/${dataRateKey}`);
+					uris.push(new Uri(dataRate, drone));
 				}
 				return uris;
 			});
