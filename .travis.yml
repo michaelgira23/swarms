@@ -3,3 +3,5 @@ node_js:
     - "node"
     - "7"
     - "6"
+before_install:
+    - sudo apt install build-essential libudev-dev
