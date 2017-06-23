@@ -73,7 +73,14 @@ export class Crazyradio {
 		// Default options
 		options = Object.assign({}, defaultOptions, this.options, options);
 
-		/** @TODO: Actually do something */
+		return this.setRadioChannel(options.channel)
+			.then(() => this.setRadioAddress(options.address))
+			.then(() => this.setDataRate(options.dataRate))
+			.then(() => this.setRadioPower(options.radioPower))
+			.then(() => this.setAckRetryDelay(options.ard))
+			.then(() => this.setAckRetryCount(options.arc))
+			.then(() => this.setAckEnable(options.ackEnable))
+			.then(() => this.setContCarrier(options.contCarrier));
 	}
 
 	/**
@@ -110,6 +117,10 @@ export class Crazyradio {
 			return Promise.reject(err);
 		}
 	}
+
+	/**
+	 * Scan for any drones on a specific data rate
+	 */
 
 	scanRange(dataRate: number): Promise<string[]> {
 		const dataRateKey = GET_DATA_RATE(dataRate);
@@ -212,7 +223,7 @@ export class Crazyradio {
 		return this.sendVendorSetup(VENDOR_REQUESTS.SET_CONT_CARRIER, (active ? 1 : 0));
 	}
 
-	scanChannels(start = 0, stop = 125, packet = BUFFERS.SOMETHING) {
+	scanChannels(start = 0, stop = 125, packet = BUFFERS.SOMETHING): Promise<Buffer> {
 		return this.sendVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, start, stop, packet)
 			.then(() => this.getVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, 0, 0, 64));
 	}
