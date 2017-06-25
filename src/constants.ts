@@ -1,18 +1,12 @@
 /**
- * Constants used throughout the library
+ * @file Constants used throughout the library
  */
 
-export const BUFFERS = {
-	// Empty buffer when sending information
-	NOTHING: Buffer.alloc(0),
-	// Single byte for sending a ping
-	SOMETHING: Buffer.alloc(1),
-	// Response from the Crazyflie that's simply a ping
-	PING: Buffer.from([0xF0, 0x01, 0x01, 0xF2])
-};
+/**
+ * Crazyradio constants
+ * These values were taken from (https://wiki.bitcraze.io/doc:crazyradio:usb:index)
+ */
 
-// For Crazyradio constants, refer to:
-// https://wiki.bitcraze.io/doc:crazyradio:usb:index
 export const CRAZYRADIO = {
 	// Vendor ID
 	VID: 0x1915,
@@ -64,6 +58,31 @@ export const VENDOR_REQUESTS = {
 	SET_CONT_CARRIER  : 0x20,
 	SCAN_CHANNELS     : 0x21,
 	LAUNCH_BOOTLOADER : 0xFF
+};
+
+/**
+ * Crazyflie Real-Time Protocol (CRTP)
+ */
+
+export const PORTS = {
+	CONSOLE    : 0,
+	PARAMETERS : 2,
+	COMMANDER  : 3,
+	LOG        : 5,
+	LINK_LAYER : 15
+};
+
+/**
+ * Misc Constants
+ */
+
+export const BUFFERS = {
+	// Empty buffer when sending information
+	NOTHING: Buffer.alloc(0),
+	// Single byte for sending a ping
+	SOMETHING: Buffer.alloc(1),
+	// Response from the Crazyflie that's simply a ping
+	PING: Buffer.from([0xF0, 0x01, 0x01, 0xF2])
 };
 
 /**

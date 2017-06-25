@@ -21,6 +21,7 @@ export class InStream extends Readable {
 
 	_read(size: number) {
 		console.log('InStream - Read:', size);
+		this.endpoint.startPoll(3, 64);
 	}
 
 	private onData(chunk: Buffer) {
@@ -39,6 +40,7 @@ export class InStream extends Readable {
 
 	private onEnd() {
 		console.log('InStream - OnEnd');
+		this.push(null);
 	}
 
 }
@@ -50,12 +52,15 @@ export class InStream extends Readable {
 export class OutStream extends Writable {
 
 	constructor(private endpoint: usb.OutEndpoint) {
-		super();
+		super({
+			decodeStrings: false
+		});
 		(this.endpoint as OutEndpointWithOn).on('error', this.onError.bind(this));
 		(this.endpoint as OutEndpointWithOn).on('end', this.onEnd.bind(this));
 	}
 
 	_write(chunk: Buffer, encoding: string, callback: (err?: string) => void) {
+		console.log('OutStream - Write:', chunk);
 		this.endpoint.transfer(chunk, callback);
 	}
 

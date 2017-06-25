@@ -8,6 +8,7 @@ import {
 	VENDOR_REQUESTS
 } from '../constants';
 import { Uri } from '../uri';
+import { InStream, OutStream } from './usbstreams';
 
 import * as _ from 'lodash';
 import * as usb from 'usb';
@@ -31,6 +32,10 @@ export class Crazyradio {
 	private inEndpoint: usb.InEndpoint;
 	// Endpoint in the OUT direction (PC --> dongle)
 	private outEndpoint: usb.OutEndpoint;
+
+	// USB streams
+	private inStream: InStream;
+	private outStream: OutStream;
 
 	/**
 	 * For doing all the asynchronous setup of the Crazyradio
@@ -68,6 +73,10 @@ export class Crazyradio {
 		} catch (err) {
 			Promise.reject(`Problem configuring Crazyradio: ${err}`);
 		}
+
+		// Initialize USB streams
+		this.inStream = new InStream(this.inEndpoint);
+		this.outStream = new OutStream(this.outEndpoint);
 
 		this.initialized = true;
 	}
@@ -265,6 +274,22 @@ export class Crazyradio {
 					}
 				}
 			);
+		});
+	}
+
+	/**
+	 * Communicating with the Crazyflies
+	 */
+
+	sendPacket(packet: any) {
+		return new Promise((resolve, reject) => {
+			this.outStream.write(packet, (err: string) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
 		});
 	}
 
