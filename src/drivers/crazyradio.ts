@@ -1,4 +1,5 @@
 import {
+	BM_REQUEST_TYPE,
 	BUFFERS,
 	CRAZYRADIO,
 	DATA_RATES,
@@ -78,6 +79,10 @@ export class Crazyradio {
 		this.inStream = new InStream(this.inEndpoint);
 		this.outStream = new OutStream(this.outEndpoint);
 
+		this.inStream.on('data', this.onInStreamData.bind(this));
+		this.inStream.on('readable', this.onInStreamReadable.bind(this));
+		this.inStream.on('error', this.onInStreamError.bind(this));
+
 		this.initialized = true;
 	}
 
@@ -148,6 +153,34 @@ export class Crazyradio {
 				}
 				return uris;
 			});
+	}
+
+	/**
+	 * Communicating with the Crazyflies
+	 */
+
+	sendPacket(packet: any) {
+		return new Promise((resolve, reject) => {
+			this.outStream.write(packet, (err: string) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+		});
+	}
+
+	private onInStreamReadable(data: any) {
+		console.log('InStream Crazyradio Readable:', data);
+	}
+
+	private onInStreamData(data: any) {
+		console.log('InStream Crazyradio Data:', data);
+	}
+
+	private onInStreamError(err: string) {
+		console.log('InStream Crazyradio Error:', err);
 	}
 
 	/**
@@ -242,7 +275,7 @@ export class Crazyradio {
 	private sendVendorSetup(request: number, value: number, index: number = 0, data: Buffer | number = BUFFERS.NOTHING) {
 		return new Promise((resolve, reject) => {
 			this.device.controlTransfer(
-				VENDOR_REQUESTS.BM_REQUEST_TYPE,
+				BM_REQUEST_TYPE,
 				request,
 				value,
 				index,
@@ -261,7 +294,7 @@ export class Crazyradio {
 	private getVendorSetup(request: number, value: number, index: number, length: number) {
 		return new Promise((resolve, reject) => {
 			this.device.controlTransfer(
-				VENDOR_REQUESTS.BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,
+				BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,
 				request,
 				value,
 				index,
@@ -274,22 +307,6 @@ export class Crazyradio {
 					}
 				}
 			);
-		});
-	}
-
-	/**
-	 * Communicating with the Crazyflies
-	 */
-
-	sendPacket(packet: any) {
-		return new Promise((resolve, reject) => {
-			this.outStream.write(packet, (err: string) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
 		});
 	}
 

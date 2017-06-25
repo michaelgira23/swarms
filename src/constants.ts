@@ -45,9 +45,9 @@ export function GET_RADIO_POWER(targetPower: number) {
 	return null;
 }
 
-export const VENDOR_REQUESTS = {
-	BM_REQUEST_TYPE   : 0x40,
+export const BM_REQUEST_TYPE = 0x40;
 
+export const VENDOR_REQUESTS = {
 	SET_RADIO_CHANNEL : 0x01,
 	SET_RADIO_ADDRESS : 0x02,
 	SET_DATA_RATE     : 0x03,
@@ -62,6 +62,7 @@ export const VENDOR_REQUESTS = {
 
 /**
  * Crazyflie Real-Time Protocol (CRTP)
+ * These values were taken from (https://wiki.bitcraze.io/projects:crazyflie:crtp)
  */
 
 export const PORTS = {
