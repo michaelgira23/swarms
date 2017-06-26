@@ -13,6 +13,7 @@
 		"member-ordering": [true, "fields-first"],
 		"no-bitwise": false,
 		"no-console": false,
+		"no-inferrable-types": true,
 		"no-unused-variable": true,
 		"object-literal-sort-keys": false,
 		"quotemark": [true, "single", "avoid-escape"],

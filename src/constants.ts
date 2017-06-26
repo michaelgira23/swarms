@@ -87,9 +87,9 @@ export const BUFFERS = {
 };
 
 /**
- * Because we need a table of fixed values that we can also look up the index
+ * Because we need a table of fixed values that we can also look up the index, unlike the actual TypeScript enum
  */
 
 export interface SortaEnum {
-	[rate: string]: number;
+	[key: string]: number;
 }
