@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 /**
  * Represents a packet to send to the Crazyflie
  */
@@ -18,15 +20,35 @@ export class Packet {
 	}
 
 	export() {
-		const buffer = Buffer.concat([
-			// Start token for synchronization
-			Buffer.from('AAAA', 'hex'),
+		console.log('port', this.port);
+		// Header (3rd byte)
+		const header = Buffer.concat([
+			// The destination port
+			Buffer.from(this.port.toString(16), 'hex'),
+			// Reserved for the link layer
+			Buffer.from([0, 0]),
 			// The destination channel
 			Buffer.from(this.channel.toString(16), 'hex')
 		]);
 
-		console.log('Buffer', buffer);
+		const buffer = Buffer.concat([
+			Buffer.from('AAAA', 'hex'),
+			header
+		]);
+
+		// console.log('port', this.port.toString(16), Buffer.from([this.port]));
+		// console.log('header', header);
+		// console.log('data', this.data);
 		return buffer;
+	}
+
+	exportHexCodes() {
+		const buffer = this.export();
+		const hexes = [];
+		for (const byte of buffer) {
+			hexes.push(`0x${_.padStart(byte.toString(16), 2, '0')}`);
+		}
+		return hexes;
 	}
 
 }

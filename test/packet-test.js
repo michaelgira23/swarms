@@ -1,4 +1,6 @@
 const { Packet } = require('../dist/packet');
 
 const packet = new Packet();
-console.log(packet.export());
+packet.port = 3;
+console.log('Export', packet.export());
+console.log('toString', packet.exportHexCodes().join(' '));
