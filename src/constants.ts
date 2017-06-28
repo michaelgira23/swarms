@@ -73,8 +73,10 @@ export const PORTS = {
 	LINK_LAYER : 15
 };
 
+export const MAX_PAYLOAD_SIZE = 31;
+
 /**
- * Misc Constants
+ * Buffer Constants
  */
 
 export const BUFFERS = {
@@ -85,6 +87,63 @@ export const BUFFERS = {
 	// Response from the Crazyflie that's simply a ping
 	PING: Buffer.from([0xF0, 0x01, 0x01, 0xF2])
 };
+
+/**
+ * Factory to return read and write functions for a buffer
+ */
+
+export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
+	return {
+		double: {
+			size: 8,
+			read: buffer.readDoubleLE,
+			write: buffer.writeDoubleLE
+		},
+		float: {
+			size: 4,
+			read: buffer.readFloatLE,
+			write: buffer.writeFloatLE
+		},
+		int8: {
+			size: 1,
+			read: buffer.readInt8,
+			write: buffer.writeInt8
+		},
+		int16: {
+			size: 2,
+			read: buffer.readInt16LE,
+			write: buffer.writeInt16LE
+		},
+		int32: {
+			size: 4,
+			read: buffer.readInt32LE,
+			write: buffer.writeInt32LE
+		},
+		uInt8: {
+			size: 1,
+			read: buffer.readUInt8,
+			write: buffer.writeUInt8
+		},
+		uInt16: {
+			size: 2,
+			read: buffer.readUInt16LE,
+			write: buffer.writeUInt16LE
+		},
+		uInt32: {
+			size: 4,
+			read: buffer.readUInt32LE,
+			write: buffer.writeUInt32LE
+		}
+	};
+}
+
+export type Type = 'double' | 'float' | 'int8' | 'int16' | 'int32' | 'uInt8' | 'uInt16' | 'uInt32';
+
+export interface TypeData {
+	size: number; // Size in bytes
+	read: (offset: number, noAssert?: boolean) => number;
+	write: (value: number, offset: number, noAssert?: boolean) => number;
+}
 
 /**
  * Because we need a table of fixed values that we can also look up the index, unlike the actual TypeScript enum

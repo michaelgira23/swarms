@@ -8,6 +8,7 @@ import {
 	RADIO_POWERS,
 	VENDOR_REQUESTS
 } from '../constants';
+import { Packet } from '../packet';
 import { Uri } from '../uri';
 import { InStream, OutStream } from './usbstreams';
 
@@ -156,12 +157,24 @@ export class Crazyradio {
 	}
 
 	/**
+	 * Ping the Crazyflie
+	 */
+
+	ping() {
+		const packet = new Packet();
+		packet.port = 15;
+		packet.writeType('int8', 0x01);
+
+		return this.sendPacket(packet);
+	}
+
+	/**
 	 * Communicating with the Crazyflies
 	 */
 
-	sendPacket(packet: any) {
+	sendPacket(packet: Packet) {
 		return new Promise((resolve, reject) => {
-			this.outStream.write(packet, (err: string) => {
+			this.outStream.write(packet.export(), (err: string) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -272,7 +285,7 @@ export class Crazyradio {
 			.then(() => this.getVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, 0, 0, 64));
 	}
 
-	private sendVendorSetup(request: number, value: number, index: number = 0, data: Buffer | number = BUFFERS.NOTHING) {
+	private sendVendorSetup(request: number, value: number, index = 0, data: Buffer | number = BUFFERS.NOTHING) {
 		return new Promise((resolve, reject) => {
 			this.device.controlTransfer(
 				BM_REQUEST_TYPE,

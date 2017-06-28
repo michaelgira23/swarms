@@ -1,3 +1,5 @@
+import { BUFFER_TYPES, MAX_PAYLOAD_SIZE, Type } from './constants';
+
 import * as _ from 'lodash';
 
 /**
@@ -9,36 +11,62 @@ export class Packet {
 	port = 0;
 	channel = 0;
 
-	data: Buffer = Buffer.alloc(31, null);
+	pointer = 0;
+	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE, null);
 
-	constructor() {
-		//
+	write(value: number) {
+		const stringValue = value.toString(16);
+
+		if (this.pointer + stringValue.length > this.data.length) {
+			throw new Error(`Writing "0x${stringValue}" exceeds payload length of ${this.data.length}!`);
+		}
+
+		this.data.write(stringValue, this.pointer, stringValue.length, 'hex');
+		this.pointer += stringValue.length;
 	}
 
-	writeDouble(value: number) {
-		//
+	/**
+	 * Write a type onto the packet payload
+	 */
+
+	writeType(type: Type, value: number) {
+		const typeData = BUFFER_TYPES(this.data)[type];
+
+		if (typeof typeData === 'undefined') {
+			throw new Error(`Invalid type "${type}"!`);
+		}
+		if (this.pointer + typeData.size > this.data.length) {
+			throw new Error(`Writing type "${type}" exceeds payload length of ${this.data.length}!`);
+		}
+
+		typeData.write(value, this.pointer);
+		this.pointer += typeData.size;
+
+		console.log('Write', this.pointer, this.data);
 	}
 
 	export() {
-		console.log('port', this.port);
-		// Header (3rd byte)
-		const header = Buffer.concat([
-			// The destination port
-			Buffer.from(this.port.toString(16), 'hex'),
-			// Reserved for the link layer
-			Buffer.from([0, 0]),
-			// The destination channel
-			Buffer.from(this.channel.toString(16), 'hex')
+		const header = Buffer.from(((this.port & 0x0f) << 4 | 0x03 << 2 | (this.channel & 0x03)).toString(16), 'hex');
+		const payload = this.data.slice(0, this.pointer);
+
+		const packet = Buffer.concat([
+			header,
+			Buffer.from(payload.length.toString(16), 'hex'),
+			payload
 		]);
+
+		let ckSum = 0;
+		for (const byte of packet) {
+			ckSum += byte;
+		}
+		ckSum %= 256;
 
 		const buffer = Buffer.concat([
-			Buffer.from('AAAA', 'hex'),
-			header
+			Buffer.from('aaaa', 'hex'),
+			packet,
+			Buffer.from(ckSum.toString(16), 'hex')
 		]);
 
-		// console.log('port', this.port.toString(16), Buffer.from([this.port]));
-		// console.log('header', header);
-		// console.log('data', this.data);
 		return buffer;
 	}
 
