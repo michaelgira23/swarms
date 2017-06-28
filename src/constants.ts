@@ -90,49 +90,50 @@ export const BUFFERS = {
 
 /**
  * Factory to return read and write functions for a buffer
+ * We need to bind the `this` context to the functions otherwise it won't work
  */
 
 export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
 	return {
 		double: {
 			size: 8,
-			read: buffer.readDoubleLE,
-			write: buffer.writeDoubleLE
+			read: buffer.readDoubleLE.bind(buffer),
+			write: buffer.writeDoubleLE.bind(buffer)
 		},
 		float: {
 			size: 4,
-			read: buffer.readFloatLE,
-			write: buffer.writeFloatLE
+			read: buffer.readFloatLE.bind(buffer),
+			write: buffer.writeFloatLE.bind(buffer)
 		},
 		int8: {
 			size: 1,
-			read: buffer.readInt8,
-			write: buffer.writeInt8
+			read: buffer.readInt8.bind(buffer),
+			write: buffer.writeInt8.bind(buffer)
 		},
 		int16: {
 			size: 2,
-			read: buffer.readInt16LE,
-			write: buffer.writeInt16LE
+			read: buffer.readInt16LE.bind(buffer),
+			write: buffer.writeInt16LE.bind(buffer)
 		},
 		int32: {
 			size: 4,
-			read: buffer.readInt32LE,
-			write: buffer.writeInt32LE
+			read: buffer.readInt32LE.bind(buffer),
+			write: buffer.writeInt32LE.bind(buffer)
 		},
 		uInt8: {
 			size: 1,
-			read: buffer.readUInt8,
-			write: buffer.writeUInt8
+			read: buffer.readUInt8.bind(buffer),
+			write: buffer.writeUInt8.bind(buffer)
 		},
 		uInt16: {
 			size: 2,
-			read: buffer.readUInt16LE,
-			write: buffer.writeUInt16LE
+			read: buffer.readUInt16LE.bind(buffer),
+			write: buffer.writeUInt16LE.bind(buffer)
 		},
 		uInt32: {
 			size: 4,
-			read: buffer.readUInt32LE,
-			write: buffer.writeUInt32LE
+			read: buffer.readUInt32LE.bind(buffer),
+			write: buffer.writeUInt32LE.bind(buffer)
 		}
 	};
 }

@@ -163,7 +163,7 @@ export class Crazyradio {
 	ping() {
 		const packet = new Packet();
 		packet.port = 15;
-		packet.writeType('int8', 0x01);
+		packet.write('int8', 0x01);
 
 		return this.sendPacket(packet);
 	}

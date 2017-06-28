@@ -1,4 +1,5 @@
 import { BUFFER_TYPES, MAX_PAYLOAD_SIZE, Type } from './constants';
+import { toHex } from './utils';
 
 import * as _ from 'lodash';
 
@@ -12,24 +13,13 @@ export class Packet {
 	channel = 0;
 
 	pointer = 0;
-	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE, null);
-
-	write(value: number) {
-		const stringValue = value.toString(16);
-
-		if (this.pointer + stringValue.length > this.data.length) {
-			throw new Error(`Writing "0x${stringValue}" exceeds payload length of ${this.data.length}!`);
-		}
-
-		this.data.write(stringValue, this.pointer, stringValue.length, 'hex');
-		this.pointer += stringValue.length;
-	}
+	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE);
 
 	/**
 	 * Write a type onto the packet payload
 	 */
 
-	writeType(type: Type, value: number) {
+	write(type: Type, value: number) {
 		const typeData = BUFFER_TYPES(this.data)[type];
 
 		if (typeof typeData === 'undefined') {
@@ -41,40 +31,52 @@ export class Packet {
 
 		typeData.write(value, this.pointer);
 		this.pointer += typeData.size;
-
-		console.log('Write', this.pointer, this.data);
 	}
 
+	/**
+	 * Export packet into a complete buffer to send to the Crazyflie
+	 */
+
 	export() {
-		const header = Buffer.from(((this.port & 0x0f) << 4 | 0x03 << 2 | (this.channel & 0x03)).toString(16), 'hex');
+		// First 4 bits are port, next 2 bits are reserved for link layer, last 2 bits are for channel
+		let header = (this.port & 0x0f) << 4 | (this.channel & 0x03);
+		// Set link layer bits to 0 by applying this mask
+		header &= ~(0x03 << 2);
+
+		// Slice data buffer to the actual payload we used
 		const payload = this.data.slice(0, this.pointer);
 
+		// Put stuff together that we want to include in checksum
 		const packet = Buffer.concat([
-			header,
-			Buffer.from(payload.length.toString(16), 'hex'),
+			Buffer.from(header.toString(16), 'hex'),
+			Buffer.from(toHex(payload.length, true), 'hex'),
 			payload
 		]);
 
-		let ckSum = 0;
+		// Count up packet to get checksum
+		let cksum = 0;
 		for (const byte of packet) {
-			ckSum += byte;
+			cksum += byte;
 		}
-		ckSum %= 256;
+		cksum %= 256;
 
-		const buffer = Buffer.concat([
+		// Include final things (start token and checksum)
+		return Buffer.concat([
 			Buffer.from('aaaa', 'hex'),
 			packet,
-			Buffer.from(ckSum.toString(16), 'hex')
+			Buffer.from(cksum.toString(16), 'hex')
 		]);
-
-		return buffer;
 	}
+
+	/**
+	 * Return an array of hex codes for debugging
+	 */
 
 	exportHexCodes() {
 		const buffer = this.export();
 		const hexes = [];
 		for (const byte of buffer) {
-			hexes.push(`0x${_.padStart(byte.toString(16), 2, '0')}`);
+			hexes.push(toHex(byte, true, true));
 		}
 		return hexes;
 	}
