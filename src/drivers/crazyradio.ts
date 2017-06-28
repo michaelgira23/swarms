@@ -335,19 +335,27 @@ export class Crazyradio {
 	}
 
 	/**
-	 * Finds available Crazyradios plugged in via USB
+	 * Find available Crazyradios plugged in via USB
 	 */
 
 	static findRadios(
 		vid: number = CRAZYRADIO.VID,
 		pid: number = CRAZYRADIO.PID
 	) {
-		const devices = usb.getDeviceList();
 		// Only return devices that match the specified product id and vendor id
-		return _.filter(devices, device =>
-			(device.deviceDescriptor.idVendor === vid)
-			&& (device.deviceDescriptor.idProduct === pid)
-		);
+		return this.findUSBDevices()
+			.filter(device =>
+				(device.deviceDescriptor.idVendor === vid)
+				&& (device.deviceDescriptor.idProduct === pid)
+			);
+	}
+
+	/**
+	 * Find ALL USB devices plugged into the Computer
+	 */
+
+	static findUSBDevices() {
+		return usb.getDeviceList();
 	}
 }
 
