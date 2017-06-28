@@ -12,6 +12,8 @@ import { InEndpointWithOn, OutEndpointWithOn } from '../endpoints';
 
 export class InStream extends Readable {
 
+	polling = false;
+
 	constructor(private endpoint: usb.InEndpoint) {
 		super();
 		(this.endpoint as InEndpointWithOn).on('data', this.onData.bind(this));
@@ -20,13 +22,17 @@ export class InStream extends Readable {
 	}
 
 	_read(size: number) {
-		console.log('InStream - Read:', size);
-		this.endpoint.startPoll(3, 64);
+		console.log('InStream (dongle --> pc) - Read:', size);
+		if (!this.polling) {
+			this.polling = true;
+			this.endpoint.startPoll(3, 64);
+		}
 	}
 
 	private onData(chunk: Buffer) {
-		console.log('InStream - OnData:', chunk);
+		console.log('InStream (dongle --> pc) - OnData:', chunk);
 		if (!this.push(chunk)) {
+			this.polling = false;
 			// Disable line because callback is required, but we don't need anything in it (?)
 			// tslint:disable-next-line:no-empty
 			this.endpoint.stopPoll(() => {});
@@ -34,12 +40,12 @@ export class InStream extends Readable {
 	}
 
 	private onError(err: Error) {
-		console.log('InStream - OnError:', err);
+		console.log('InStream (dongle --> pc) - OnError:', err);
 		this.emit('error', err);
 	}
 
 	private onEnd() {
-		console.log('InStream - OnEnd');
+		console.log('InStream (dongle --> pc) - OnEnd');
 		this.push(null);
 	}
 
@@ -60,17 +66,17 @@ export class OutStream extends Writable {
 	}
 
 	_write(chunk: Buffer, encoding: string, callback: (err?: string) => void) {
-		console.log('OutStream - Write:', chunk);
+		console.log('OutStream (pc --> dongle) - Write:', chunk);
 		this.endpoint.transfer(chunk, callback);
 	}
 
 	private onError(err: Error) {
-		console.log('OutStream - OnError:', err);
+		console.log('OutStream (pc --> dongle) - OnError:', err);
 		this.emit('error', err);
 	}
 
 	private onEnd() {
-		console.log('OutStream - OnEnd');
+		console.log('OutStream (pc --> dongle) - OnEnd');
 	}
 
 }

@@ -10,6 +10,7 @@ import {
 } from '../constants';
 import { Packet } from '../packet';
 import { Uri } from '../uri';
+import { toHex } from '../utils';
 import { InStream, OutStream } from './usbstreams';
 
 import * as _ from 'lodash';
@@ -124,6 +125,17 @@ export class Crazyradio {
 	}
 
 	/**
+	 * Tune into the correct parameters to connect to a Crazyflie uri
+	 */
+
+	connect(uri: Uri) {
+		return this.configure({
+			dataRate: uri.dataRate,
+			channel: uri.channel
+		});
+	}
+
+	/**
 	 * Scan for any nearby Crazyflies
 	 */
 
@@ -164,7 +176,6 @@ export class Crazyradio {
 		const packet = new Packet();
 		packet.port = 15;
 		packet.write('int8', 0x01);
-
 		return this.sendPacket(packet);
 	}
 
@@ -210,7 +221,7 @@ export class Crazyradio {
 
 	setRadioAddress(address: number) {
 		this.options.address = address;
-		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ADDRESS, 0, 0, address);
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ADDRESS, 0, 0, Buffer.from(toHex(address), 'hex'));
 	}
 
 	setDataRate(rate: number) {

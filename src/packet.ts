@@ -35,9 +35,11 @@ export class Packet {
 
 	/**
 	 * Export packet into a complete buffer to send to the Crazyflie
+	 * Optionally specify serial port for alternate packet structure:
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#serial_port)
 	 */
 
-	export() {
+	export(serialPort = false) {
 		// First 4 bits are port, next 2 bits are reserved for link layer, last 2 bits are for channel
 		let header = (this.port & 0x0f) << 4 | (this.channel & 0x03);
 		// Set link layer bits to 0 by applying this mask
@@ -45,6 +47,13 @@ export class Packet {
 
 		// Slice data buffer to the actual payload we used
 		const payload = this.data.slice(0, this.pointer);
+
+		if (!serialPort) {
+			return Buffer.concat([
+				Buffer.from(header.toString(16), 'hex'),
+				payload
+			]);
+		}
 
 		// Put stuff together that we want to include in checksum
 		const packet = Buffer.concat([
@@ -72,8 +81,8 @@ export class Packet {
 	 * Return an array of hex codes for debugging
 	 */
 
-	exportHexCodes() {
-		const buffer = this.export();
+	exportHexCodes(serialPort?: boolean) {
+		const buffer = this.export(serialPort);
 		const hexes = [];
 		for (const byte of buffer) {
 			hexes.push(toHex(byte, true, true));
