@@ -21,7 +21,7 @@
 const { toHex, toBinary } = require('../dist/index').utils;
 const _ = require('lodash');
 
-const bytes = process.argv.splice(2).map(x => parseInt(x));
+const bytes = process.argv.splice(2).map(x => parseInt(x, 16));
 
 // Find the last byte number length so we can align all the colons
 const indexLength = (bytes.length - 1).toString().length + 1;

@@ -15,6 +15,16 @@ export class Packet {
 	pointer = 0;
 	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE);
 
+	constructor(data?: Buffer) {
+		if (data) {
+			const headerInfo = Packet.parseHeader(data[0]);
+			this.port = headerInfo.port;
+			this.channel = headerInfo.channel;
+
+			this.data = data.slice(1);
+		}
+	}
+
 	/**
 	 * Write a type onto the packet payload
 	 */
@@ -34,16 +44,27 @@ export class Packet {
 	}
 
 	/**
+	 * Generate header with current port and channel
+	 * Header format located here:
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#packet_structure)
+	 */
+
+	getHeader() {
+		// First 4 bits are port, next 2 bits are reserved for link layer, last 2 bits are for channel
+		let header = (this.port & 0x0f) << 4 | (this.channel & 0x03);
+		// Set link layer bits to 0 by applying this mask
+		header &= ~(0x03 << 2);
+		return header;
+	}
+
+	/**
 	 * Export packet into a complete buffer to send to the Crazyflie
 	 * Optionally specify serial port for alternate packet structure:
 	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#serial_port)
 	 */
 
 	export(serialPort = false) {
-		// First 4 bits are port, next 2 bits are reserved for link layer, last 2 bits are for channel
-		let header = (this.port & 0x0f) << 4 | (this.channel & 0x03);
-		// Set link layer bits to 0 by applying this mask
-		header &= ~(0x03 << 2);
+		const header = this.getHeader();
 
 		// Slice data buffer to the actual payload we used
 		const payload = this.data.slice(0, this.pointer);
@@ -88,6 +109,42 @@ export class Packet {
 			hexes.push(toHex(byte, true, true));
 		}
 		return hexes;
+	}
+
+	static parseHeader(header: number) {
+		return {
+			port: (header & 0xf0) >> 4,
+			channel: header & 0x03
+		};
+	}
+
+}
+
+/**
+ * Acknowledge packet response from the Crazyflie
+ * Header byte format is documented here:
+ * (https://wiki.bitcraze.io/doc:crazyradio:usb:index#data_transfer)
+ */
+
+export class Ack extends Packet {
+
+	ackHeader: number;
+	retry: number;
+	powerDetector: boolean;
+	ackReceived: boolean;
+
+	// packet: Packet;
+
+	constructor(packet: Buffer) {
+		super(packet.slice(1));
+
+		this.ackHeader = packet[0];
+		this.retry = this.ackHeader >> 4;
+		this.powerDetector = !!(this.ackHeader & 0x02);
+		this.ackReceived = !!(this.ackHeader & 0x01);
+
+		// Don't allow any more changes to this class
+		Object.freeze(this);
 	}
 
 }

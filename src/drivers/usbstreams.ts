@@ -22,7 +22,7 @@ export class InStream extends Readable {
 	}
 
 	_read(size: number) {
-		console.log('InStream (dongle --> pc) - Read:', size);
+		// console.log('InStream (dongle --> pc) - Read:', size);
 		if (!this.polling) {
 			this.polling = true;
 			this.endpoint.startPoll(3, 64);
@@ -30,7 +30,7 @@ export class InStream extends Readable {
 	}
 
 	private onData(chunk: Buffer) {
-		console.log('InStream (dongle --> pc) - OnData:', chunk);
+		// console.log('InStream (dongle --> pc) - OnData:', chunk);
 		if (!this.push(chunk)) {
 			this.polling = false;
 			// Disable line because callback is required, but we don't need anything in it (?)
@@ -40,12 +40,12 @@ export class InStream extends Readable {
 	}
 
 	private onError(err: Error) {
-		console.log('InStream (dongle --> pc) - OnError:', err);
+		// console.log('InStream (dongle --> pc) - OnError:', err);
 		this.emit('error', err);
 	}
 
 	private onEnd() {
-		console.log('InStream (dongle --> pc) - OnEnd');
+		// console.log('InStream (dongle --> pc) - OnEnd');
 		this.push(null);
 	}
 
@@ -66,17 +66,17 @@ export class OutStream extends Writable {
 	}
 
 	_write(chunk: Buffer, encoding: string, callback: (err?: string) => void) {
-		console.log('OutStream (pc --> dongle) - Write:', chunk);
+		// console.log('OutStream (pc --> dongle) - Write:', chunk);
 		this.endpoint.transfer(chunk, callback);
 	}
 
 	private onError(err: Error) {
-		console.log('OutStream (pc --> dongle) - OnError:', err);
+		// console.log('OutStream (pc --> dongle) - OnError:', err);
 		this.emit('error', err);
 	}
 
 	private onEnd() {
-		console.log('OutStream (pc --> dongle) - OnEnd');
+		// console.log('OutStream (pc --> dongle) - OnEnd');
 	}
 
 }

@@ -5,14 +5,16 @@ import {
 	DATA_RATES,
 	GET_DATA_RATE,
 	GET_RADIO_POWER,
+	PORTS,
 	RADIO_POWERS,
 	VENDOR_REQUESTS
 } from '../constants';
-import { Packet } from '../packet';
+import { Ack, Packet } from '../packet';
 import { Uri } from '../uri';
 import { toHex } from '../utils';
 import { InStream, OutStream } from './usbstreams';
 
+import { EventEmitter } from 'events';
 import * as _ from 'lodash';
 import * as usb from 'usb';
 
@@ -20,7 +22,7 @@ import * as usb from 'usb';
  * Class for controlling the Crazyradio
  */
 
-export class Crazyradio {
+export class Crazyradio extends EventEmitter {
 
 	private initialized = false;
 	// Crazyradio options
@@ -82,7 +84,6 @@ export class Crazyradio {
 		this.outStream = new OutStream(this.outEndpoint);
 
 		this.inStream.on('data', this.onInStreamData.bind(this));
-		this.inStream.on('readable', this.onInStreamReadable.bind(this));
 		this.inStream.on('error', this.onInStreamError.bind(this));
 
 		this.initialized = true;
@@ -195,16 +196,64 @@ export class Crazyradio {
 		});
 	}
 
-	private onInStreamReadable(data: any) {
-		console.log('InStream Crazyradio Readable:', data);
-	}
+	private onInStreamData(data: Buffer) {
+		const ackPack = new Ack(data);
+		// console.log('InStream Crazyradio Data:', ackPack);
 
-	private onInStreamData(data: any) {
-		console.log('InStream Crazyradio Data:', data);
+		this.emit('all', ackPack);
+
+		// If ack pack lacks the feedback, it's a slack
+		if (!ackPack.ackReceived) {
+			return;
+		}
+
+		// Keep track of current console buffer so we can emit a 'console line' event
+		// which automagically separates newline characters
+		let consoleLine = '';
+
+		switch (ackPack.port) {
+			case PORTS.CONSOLE:
+				this.emit('console', ackPack);
+				console.log('[Console]', JSON.stringify(ackPack.data.toString()));
+
+				// Add new console data to the current line string
+				consoleLine += ackPack.data.toString();
+				// Divide up console line by newline characters
+				const lines = consoleLine.split('\n');
+
+				/** @todo Fix character loss */
+
+				// Emit all of the resulting lines except for the last one (which becomes the new current console line)
+				for (let i = 0; i < lines.length; i++) {
+					if (i === lines.length - 1) {
+						consoleLine = lines[i];
+						break;
+					}
+					this.emit('console line', lines[i]);
+					// console.log('[Console Line]', lines[i]);
+				}
+				break;
+			case PORTS.PARAMETERS:
+				this.emit('parameters', ackPack);
+				break;
+			case PORTS.COMMANDER:
+				this.emit('commander', ackPack);
+				break;
+			case PORTS.LOG:
+				this.emit('log', ackPack);
+				break;
+			case PORTS.LINK_LAYER:
+				this.emit('link layer', ackPack);
+				break;
+			default:
+				this.emit('other', ackPack);
+				break;
+		}
 	}
 
 	private onInStreamError(err: string) {
 		console.log('InStream Crazyradio Error:', err);
+		this.emit('error', err);
 	}
 
 	/**
@@ -220,8 +269,12 @@ export class Crazyradio {
 	}
 
 	setRadioAddress(address: number) {
+		const buf = Buffer.from(toHex(address), 'hex');
+		if (buf.length !== 5) {
+			return Promise.reject(`Address should be 5 bytes long! Not ${buf.length}!`);
+		}
 		this.options.address = address;
-		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ADDRESS, 0, 0, Buffer.from(toHex(address), 'hex'));
+		return this.sendVendorSetup(VENDOR_REQUESTS.SET_RADIO_ADDRESS, 0, 0, buf);
 	}
 
 	setDataRate(rate: number) {
@@ -296,7 +349,7 @@ export class Crazyradio {
 			.then(() => this.getVendorSetup(VENDOR_REQUESTS.SCAN_CHANNELS, 0, 0, 64));
 	}
 
-	private sendVendorSetup(request: number, value: number, index = 0, data: Buffer | number = BUFFERS.NOTHING) {
+	private sendVendorSetup(request: number, value: number, index = 0, data = BUFFERS.NOTHING) {
 		return new Promise((resolve, reject) => {
 			this.device.controlTransfer(
 				BM_REQUEST_TYPE,
