@@ -42,6 +42,10 @@ export class Crazyradio extends EventEmitter {
 	private inStream: InStream;
 	private outStream: OutStream;
 
+	// Used in `onInStreamData()` for keeping track of current console buffer
+	// so we can emit a 'console line' event which automagically emits between newline characters
+	consoleLine = '';
+
 	/**
 	 * For doing all the asynchronous setup of the Crazyradio
 	 */
@@ -204,33 +208,31 @@ export class Crazyradio extends EventEmitter {
 
 		// If ack pack lacks the feedback, it's a slack
 		if (!ackPack.ackReceived) {
+			this.emit('no ack', ackPack);
 			return;
 		}
-
-		// Keep track of current console buffer so we can emit a 'console line' event
-		// which automagically separates newline characters
-		let consoleLine = '';
 
 		switch (ackPack.port) {
 			case PORTS.CONSOLE:
 				this.emit('console', ackPack);
-				console.log('[Console]', JSON.stringify(ackPack.data.toString()));
+
+				// Below logic is for emitting the 'console line' event.
+				// This will emit output just like the 'console' event, but only between newline characters,
+				// so every emit is a new line
 
 				// Add new console data to the current line string
-				consoleLine += ackPack.data.toString();
+				this.consoleLine += ackPack.data.toString();
 				// Divide up console line by newline characters
-				const lines = consoleLine.split('\n');
+				const lines = this.consoleLine.split(/\r?\n/);
 
-				/** @todo Fix character loss */
-
-				// Emit all of the resulting lines except for the last one (which becomes the new current console line)
+				// Loop through broken up parts either emitting them as a 'console line' event
+				// or saving it in the consoleLine for when there is a newline character in the future
 				for (let i = 0; i < lines.length; i++) {
 					if (i === lines.length - 1) {
-						consoleLine = lines[i];
+						this.consoleLine = lines[i];
 						break;
 					}
 					this.emit('console line', lines[i]);
-					// console.log('[Console Line]', lines[i]);
 				}
 				break;
 			case PORTS.PARAMETERS:
