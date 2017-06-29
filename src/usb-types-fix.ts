@@ -12,3 +12,8 @@ export interface InEndpointWithOn extends usb.InEndpoint {
 export interface OutEndpointWithOn extends usb.OutEndpoint {
 	on(event: string, callback: (device: usb.Device) => void): void;
 }
+
+export interface InterfaceFixed extends usb.Interface {
+	release(cb?: (err?: string) => void): void;
+	release(closeEndpoints?: boolean, cb?: (err?: string) => void): void;
+}

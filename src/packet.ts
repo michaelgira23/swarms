@@ -111,6 +111,20 @@ export class Packet {
 		return hexes;
 	}
 
+	/**
+	 * Determine of two packets are equal to each other
+	 */
+
+	equals(other: Packet) {
+		return (this.port === other.port)
+			&& (this.channel === other.channel)
+			&& this.data.equals(other.data);
+	}
+
+	/**
+	 * You take the header... then you parse it
+	 */
+
 	static parseHeader(header: number) {
 		return {
 			port: (header & 0xf0) >> 4,
@@ -133,8 +147,6 @@ export class Ack extends Packet {
 	powerDetector: boolean;
 	ackReceived: boolean;
 
-	// packet: Packet;
-
 	constructor(packet: Buffer) {
 		super(packet.slice(1));
 
@@ -146,5 +158,16 @@ export class Ack extends Packet {
 		// Don't allow any more changes to this class
 		Object.freeze(this);
 	}
+
+	/**
+	 * Determine if two ack packets are equal to each other
+	 */
+
+	equals(other: Ack): boolean {
+		return (this.ackHeader === other.ackHeader)
+			&& super.equals(other);
+	}
+
+	static emptyPing = new Ack(Buffer.from([0x01, 0xf0, 0x01]));
 
 }

@@ -1,5 +1,5 @@
 /**
- * Ping a Crazyflie
+ * Connect to a Crazyflie
  */
 
 const swarms = require('../dist/index');
@@ -10,6 +10,9 @@ async function main() {
 	const radio = new swarms.Crazyradio();
 	try {
 		await radio.init();
+
+		radio.on('console line', console.log);
+
 		const drones = await radio.findDrones();
 		console.log(`Nearby drones: ${drones}`);
 
@@ -17,11 +20,15 @@ async function main() {
 			throw 'Could not find any drones!';
 		}
 
-		await radio.connect(drones[0]);
-		setInterval(async () => {
-			await radio.ping();
-		}, 100);
+		const drone = await radio.connect(drones[0]);
+
+		setTimeout(async () => {
+			console.log('Disconnect!');
+			await radio.disconnect();
+		}, 3000);
+
 	} catch (err) {
 		console.log('Uh oh!', err);
+		await radio.close();
 	}
 }

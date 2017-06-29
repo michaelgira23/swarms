@@ -9,8 +9,10 @@ import {
 	RADIO_POWERS,
 	VENDOR_REQUESTS
 } from '../constants';
+import { Crazyflie } from '../crazyflie';
 import { Ack, Packet } from '../packet';
 import { Uri } from '../uri';
+import { InterfaceFixed } from '../usb-types-fix';
 import { toHex } from '../utils';
 import { InStream, OutStream } from './usbstreams';
 
@@ -24,11 +26,12 @@ import * as usb from 'usb';
 
 export class Crazyradio extends EventEmitter {
 
-	private initialized = false;
 	// Crazyradio options
 	options: CrazyradioOptions = defaultOptions;
 	// Firmware version of Crazyradio
 	version: number;
+
+	private initialized = false;
 
 	// USB stuff
 	private device: usb.Device;
@@ -44,7 +47,18 @@ export class Crazyradio extends EventEmitter {
 
 	// Used in `onInStreamData()` for keeping track of current console buffer
 	// so we can emit a 'console line' event which automagically emits between newline characters
-	consoleLine = '';
+	private consoleLine = '';
+
+	// Ping the drone at least every X milliseconds
+	private fallbackPingInterval: NodeJS.Timer;
+	// If there's incoming data, have a faster ping timeout
+	private fallbackPingTimeout: NodeJS.Timer;
+	// How many milliseconds the interval should be. A ping will be sent no matter what on this interval.
+	// (for fallbackPingInterval)
+	private pingInterval = 1000;
+	// How many milliseconds after receiving a non-empty packet should we wait until sending another ping
+	// (for fallbackPingTimeout)
+	private packetResponseTimeout = 100;
 
 	/**
 	 * For doing all the asynchronous setup of the Crazyradio
@@ -117,12 +131,16 @@ export class Crazyradio extends EventEmitter {
 
 	close() {
 		return new Promise((resolve, reject) => {
-			this.interface.release(err => {
+			if (!this.interface) {
+				resolve();
+				this.initialized = false;
+			}
+
+			(this.interface as InterfaceFixed).release(true, err => {
 				if (err) {
 					reject(err);
 					return;
 				}
-				this.device.close();
 				this.initialized = false;
 				resolve();
 			});
@@ -130,14 +148,34 @@ export class Crazyradio extends EventEmitter {
 	}
 
 	/**
-	 * Tune into the correct parameters to connect to a Crazyflie uri
+	 * Tune into the correct parameters to connect to a Crazyflie uri and return a Crazyflie instance
 	 */
 
 	connect(uri: Uri) {
+		this.disconnect();
 		return this.configure({
 			dataRate: uri.dataRate,
 			channel: uri.channel
-		});
+		})
+			.then(() => {
+				// Set ping interval
+				clearInterval(this.fallbackPingInterval);
+				this.fallbackPingInterval = setInterval(() => {
+					this.ping();
+				}, this.pingInterval);
+
+				return new Crazyflie(this);
+			});
+	}
+
+	/**
+	 * Stop connecting to the drone
+	 */
+
+	disconnect() {
+		// Stop pinging the drone
+		clearInterval(this.fallbackPingInterval);
+		clearTimeout(this.fallbackPingTimeout);
 	}
 
 	/**
@@ -202,7 +240,6 @@ export class Crazyradio extends EventEmitter {
 
 	private onInStreamData(data: Buffer) {
 		const ackPack = new Ack(data);
-		// console.log('InStream Crazyradio Data:', ackPack);
 
 		this.emit('all', ackPack);
 
@@ -250,6 +287,14 @@ export class Crazyradio extends EventEmitter {
 			default:
 				this.emit('other', ackPack);
 				break;
+		}
+
+		// If the response packet wasn't empty, add a timeout to get another ping sooner
+		if (!ackPack.equals(Ack.emptyPing)) {
+			clearTimeout(this.fallbackPingTimeout);
+			this.fallbackPingTimeout = setTimeout(() => {
+				this.ping();
+			}, this.packetResponseTimeout);
 		}
 	}
 
