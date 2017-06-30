@@ -41,6 +41,9 @@ export class Packet {
 
 		typeData.write(value, this.pointer);
 		this.pointer += typeData.size;
+
+		// For chainability
+		return this;
 	}
 
 	/**

@@ -15,4 +15,5 @@ async function main() {
 	} catch (err) {
 		console.log('Uh oh!', err);
 	}
+	await radio.close();
 }

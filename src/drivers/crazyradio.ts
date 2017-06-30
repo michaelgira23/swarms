@@ -157,7 +157,7 @@ export class Crazyradio extends EventEmitter {
 			dataRate: uri.dataRate,
 			channel: uri.channel
 		})
-			.then(() => {
+			.then(async () => {
 				// Set ping interval
 				clearInterval(this.fallbackPingInterval);
 				this.fallbackPingInterval = setInterval(() => {
