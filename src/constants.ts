@@ -2,16 +2,16 @@
  * @file Constants used throughout the library
  */
 
+// import * as ieee754 from 'ieee754';
+
 /**
  * Crazyradio constants
  * These values were taken from (https://wiki.bitcraze.io/doc:crazyradio:usb:index)
  */
 
 export const CRAZYRADIO = {
-	// Vendor ID
-	VID: 0x1915,
-	// Product ID
-	PID: 0x7777
+	VID: 0x1915, // Vendor ID of dongle
+	PID: 0x7777  // Product ID of dongle
 };
 
 export const DATA_RATES: SortaEnum = {
@@ -69,23 +69,47 @@ export const PORTS = {
 	CONSOLE    : 0,
 	PARAMETERS : 2,
 	COMMANDER  : 3,
-	LOG        : 5,
+	LOGGING    : 5,
 	LINK_LAYER : 15
 };
 
 export const MAX_PAYLOAD_SIZE = 31;
+
+// Constants for the 'logging' port (telemetry)
+
+export const LOGGING_CHANNELS = {
+	TOC      : 0, // Table of content access: Used for reading out the TOC
+	LOG_CTRL : 1, // Log control: Used for adding/removing/starting/pausing log blocks
+	LOG_DATA : 2  // Log data: Used to send log data from the Crazyflie to the client
+};
+
+export const LOGGING_COMMANDS = {
+	TOC: {
+		GET_ITEM : 0, // Get an item from the TOC
+		GET_INFO : 1  // Get information about the TOC and the LOG subsystem implementation
+	}
+};
+
+// Logging types
+// (https://wiki.bitcraze.io/projects:crazyflie:firmware:log#firmware_usage)
+export const LOGGING_TYPES: { [id: number]: Type } = {
+	1 : 'uInt8',
+	2 : 'uInt16',
+	3 : 'uInt32',
+	4 : 'int8',
+	5 : 'int16',
+	6 : 'int32',
+	7 : 'float',
+	8 : 'fp16'
+};
 
 /**
  * Buffer Constants
  */
 
 export const BUFFERS = {
-	// Empty buffer when sending information
-	NOTHING: Buffer.alloc(0),
-	// Single byte for sending a ping
-	SOMETHING: Buffer.alloc(1),
-	// Response from the Crazyflie that's simply a ping
-	PING: Buffer.from([0xF0, 0x01, 0x01, 0xF2])
+	NOTHING   : Buffer.alloc(0), // Empty buffer when sending information
+	SOMETHING : Buffer.alloc(1)  // Single byte when scanning for Crazyflies
 };
 
 /**
@@ -105,6 +129,7 @@ export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
 			read: buffer.readFloatLE.bind(buffer),
 			write: buffer.writeFloatLE.bind(buffer)
 		},
+		// Also used for writing just a plain 'ol byte
 		int8: {
 			size: 1,
 			read: buffer.readInt8.bind(buffer),
@@ -135,10 +160,13 @@ export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
 			read: buffer.readUInt32LE.bind(buffer),
 			write: buffer.writeUInt32LE.bind(buffer)
 		}
+		// fp16: {
+		// 	/** @todo Implement fp16 read and write functions */
+		// }
 	};
 }
 
-export type Type = 'double' | 'float' | 'int8' | 'int16' | 'int32' | 'uInt8' | 'uInt16' | 'uInt32';
+export type Type = 'double' | 'float' | 'int8' | 'int16' | 'int32' | 'uInt8' | 'uInt16' | 'uInt32' | 'fp16';
 
 export interface TypeData {
 	size: number; // Size in bytes

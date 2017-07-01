@@ -24,7 +24,7 @@ export class Commander {
 	 * Set the setpoint point
 	 */
 
-	setpoint(setpoint: Setpoint) {
+	setpoint(setpoint?: Setpoint) {
 
 		// Default to previous values
 		const target = Object.assign({}, this.currentSetpoint, setpoint);

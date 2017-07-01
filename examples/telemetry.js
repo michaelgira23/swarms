@@ -1,5 +1,5 @@
 /**
- * Move the propellers
+ * Getting telemetry data of the Crazyflie
  */
 
 const swarms = require('../dist/index');
@@ -22,23 +22,7 @@ async function main() {
 
 		const drone = await radio.connect(drones[0]);
 
-		setInterval(async () => {
-			await drone.commander.setpoint({
-				// thrust: 32500
-				thrust: 2000
-			});
-		}, 100);
-
-		// What to do if we exit the program via Ctrl + c
-		process.on('SIGINT', async () => {
-			await drone.commander.setpoint({
-				roll: 0,
-				pitch: 0,
-				yaw: 0,
-				thrust: 0
-			});
-			process.exit();
-		});
+		await drone.logging.getTOC();
 
 	} catch (err) {
 		console.log('Uh oh!', err);

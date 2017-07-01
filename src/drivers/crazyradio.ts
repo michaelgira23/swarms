@@ -60,6 +60,10 @@ export class Crazyradio extends EventEmitter {
 	// (for fallbackPingTimeout)
 	private packetResponseTimeout = 100;
 
+	constructor() {
+		super();
+	}
+
 	/**
 	 * For doing all the asynchronous setup of the Crazyradio
 	 */
@@ -164,7 +168,9 @@ export class Crazyradio extends EventEmitter {
 					this.ping();
 				}, this.pingInterval);
 
-				return new Crazyflie(this);
+				const drone = new Crazyflie(this);
+				await drone.init();
+				return drone;
 			});
 	}
 
@@ -278,8 +284,8 @@ export class Crazyradio extends EventEmitter {
 			case PORTS.COMMANDER:
 				this.emit('commander', ackPack);
 				break;
-			case PORTS.LOG:
-				this.emit('log', ackPack);
+			case PORTS.LOGGING:
+				this.emit('logging', ackPack);
 				break;
 			case PORTS.LINK_LAYER:
 				this.emit('link layer', ackPack);
