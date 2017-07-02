@@ -24,6 +24,14 @@ async function main() {
 
 		await drone.logging.getTOC();
 
+		drone.on('telemetry ready', () => {
+			console.log('Telemetry ready!');
+		});
+
+		drone.on('error', err => {
+			console.log('Drone error!', err);
+		});
+
 	} catch (err) {
 		console.log('Uh oh!', err);
 		await radio.close();

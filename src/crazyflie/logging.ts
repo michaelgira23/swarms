@@ -11,6 +11,7 @@ export class Logging {
 
 	// Table of contents
 
+	// How many items in the table of contents
 	tocLength: number;
 	// Cyclic redundancy check - checksum for possible TOC caching
 	tocCrc: number;
@@ -20,10 +21,10 @@ export class Logging {
 	// (1 operation = 1 log variable retrieval programming)
 	tocMaxOperations: number;
 
+	toc: TOCItem[] = [];
+
 	constructor(private crazyflie: Crazyflie) {
 		this.crazyflie.radio.on('logging', (ackPack: Ack) => {
-			console.log('Logging Recieved!', ackPack);
-
 			// Route the packet to the correct handler function
 			switch (ackPack.channel) {
 				case LOGGING_CHANNELS.TOC:
@@ -78,20 +79,24 @@ export class Logging {
 
 		console.log('Get TOC length', this.tocLength);
 
-		for (let i = 0; i < this.tocLength; i++) {
-			await this.getTOCItem(i);
+		try {
+			await this.fetchTOCItem(0);
+		} catch (err) {
+			this.crazyflie.emit('error', err);
 		}
 	}
 
 	/**
-	 * Get TOC item
+	 * Fetch TOC item from the Crazyflie
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#get_toc_item)
 	 */
 
-	getTOCItem(id: number) {
+	fetchTOCItem(id: number) {
 		if (0 > id || id >= this.tocLength) {
 			return Promise.reject(`Id "${id}" is out of range! (0-${this.tocLength - 1} inclusive)`);
 		}
+
+		console.log('Get TOC item invoked', id);
 
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
@@ -109,13 +114,33 @@ export class Logging {
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#get_toc_item)
 	 */
 
-	private handleTOCItem(data: Buffer) {
+	private async handleTOCItem(data: Buffer) {
 		const types = BUFFER_TYPES(data);
 
 		const id = types.int8.read(0);
 		const type = LOGGING_TYPES[types.int8.read(1)];
-		const key = data.slice(2).toString();
-		console.log('TOC Item', id, 'type', type, 'key', key);
+		const [ group, name ] = data.slice(2).toString().split('\u0000');
+		console.log('TOC Item', id, 'type', type, 'group', group, 'name', name);
+
+		this.toc.push({
+			id,
+			type,
+			group,
+			name
+		});
+
+		console.log(`(${this.toc.length} / ${this.tocLength}) We are ${this.tocLength - this.toc.length} items left!`);
+
+		// If that was final block, telemetry is ready
+		if (this.tocLength >= this.toc.length) {
+			this.crazyflie.emit('telemetry ready');
+		} else {
+			try {
+				await this.fetchTOCItem(id + 1);
+			} catch (err) {
+				this.crazyflie.emit('error', err);
+			}
+		}
 	}
 
 }
