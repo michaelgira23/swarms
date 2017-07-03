@@ -24,9 +24,6 @@ export class Logging {
 
 	toc: TOCItem[] = [];
 
-	tocFetchStart: Date;
-	tocFetchHandle: Date;
-
 	constructor(private crazyflie: Crazyflie) {
 		this.crazyflie.radio.on('logging', (ackPack: Ack) => {
 			// Route the packet to the correct handler function
@@ -67,8 +64,6 @@ export class Logging {
 
 		packet.write('int8', LOGGING_COMMANDS.TOC.GET_INFO);
 
-		this.tocFetchStart = new Date();
-
 		return this.crazyflie.radio.sendPacket(packet);
 	}
 
@@ -83,13 +78,6 @@ export class Logging {
 		this.tocCrc = types.int32.read(1);
 		this.tocMaxPackets = types.int8.read(5);
 		this.tocMaxOperations = types.int8.read(6);
-
-		this.tocFetchHandle = new Date();
-
-		console.log(
-			'Get TOC length', this.tocLength, 'in time',
-			(this.tocFetchHandle.getTime() - this.tocFetchStart.getTime()) / 1000, 'seconds'
-		);
 
 		while (this.toc.length < this.tocLength) {
 			this.fetchRemainingTOCItems();
@@ -119,8 +107,6 @@ export class Logging {
 			return Promise.reject(`Id "${id}" is out of range! (0-${this.tocLength - 1} inclusive)`);
 		}
 
-		console.log('Get TOC item invoked', id);
-
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
 		packet.channel = LOGGING_CHANNELS.TOC;
@@ -143,7 +129,6 @@ export class Logging {
 		const id = types.int8.read(0);
 		const type = LOGGING_TYPES[types.int8.read(1)];
 		const [ group, name ] = data.slice(2).toString().split('\u0000');
-		console.log('TOC Item', id, 'type', type, 'group', group, 'name', name);
 
 		const item: TOCItem = {
 			id,
@@ -151,9 +136,6 @@ export class Logging {
 			group,
 			name
 		};
-
-		console.log(`(${this.toc.length} / ${this.tocLength}) We are ${this.tocLength - this.toc.length} items left!
-			Occurred ${(Date.now() - this.tocFetchHandle.getTime()) / 1000} seconds after toc received.`);
 
 		// If we successfully added a non-duplicate item and that was final block, telemetry is ready
 		if (this.addTOCItem(item) && this.tocLength === this.toc.length) {
