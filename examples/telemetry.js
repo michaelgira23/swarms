@@ -22,10 +22,14 @@ async function main() {
 
 		const drone = await radio.connect(drones[0]);
 
+		const telemetryStart = new Date();
 		await drone.logging.getTOC();
 
-		drone.on('telemetry ready', () => {
-			console.log('Telemetry ready!');
+		drone.on('toc ready', () => {
+			console.log('*************************');
+			console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}`);
+			console.log(`TOC is length ${drone.logging.tocLength}`);
+			console.log('*************************');
 		});
 
 		drone.on('error', err => {

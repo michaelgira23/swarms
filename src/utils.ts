@@ -39,3 +39,13 @@ export function toBinary(decimal: number, lengthMultipleOfFour = false, gapEvery
 
 	return binary;
 }
+
+/**
+ * Returns a promise that resolves in n milliseconds
+ */
+
+export function wait(milliseconds: number) {
+	return new Promise((resolve, reject) => {
+		setTimeout(resolve, milliseconds);
+	});
+}

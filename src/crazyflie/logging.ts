@@ -1,6 +1,7 @@
 import { Crazyflie } from '.';
 import { BUFFER_TYPES, LOGGING_CHANNELS, LOGGING_COMMANDS, LOGGING_TYPES, PORTS, Type } from '../constants';
 import { Ack, Packet } from '../packet';
+import { wait } from '../utils';
 
 /**
  * Telemetry for the Crazyflie
@@ -22,6 +23,9 @@ export class Logging {
 	tocMaxOperations: number;
 
 	toc: TOCItem[] = [];
+
+	tocFetchStart: Date;
+	tocFetchHandle: Date;
 
 	constructor(private crazyflie: Crazyflie) {
 		this.crazyflie.radio.on('logging', (ackPack: Ack) => {
@@ -50,7 +54,8 @@ export class Logging {
 	}
 
 	/**
-	 * Gets the table of contents from the Crazyflie
+	 * Gets the table of contents from the Crazyflie and all the TOC items
+	 * Crazyflie will emit a 'toc done' event once TOC and items are retrieved
 	 * Required first in order to retrieve values
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#table_of_content_access)
 	 */
@@ -61,6 +66,8 @@ export class Logging {
 		packet.channel = LOGGING_CHANNELS.TOC;
 
 		packet.write('int8', LOGGING_COMMANDS.TOC.GET_INFO);
+
+		this.tocFetchStart = new Date();
 
 		return this.crazyflie.radio.sendPacket(packet);
 	}
@@ -77,12 +84,28 @@ export class Logging {
 		this.tocMaxPackets = types.int8.read(5);
 		this.tocMaxOperations = types.int8.read(6);
 
-		console.log('Get TOC length', this.tocLength);
+		this.tocFetchHandle = new Date();
 
-		try {
-			await this.fetchTOCItem(0);
-		} catch (err) {
-			this.crazyflie.emit('error', err);
+		console.log(
+			'Get TOC length', this.tocLength, 'in time',
+			(this.tocFetchHandle.getTime() - this.tocFetchStart.getTime()) / 1000, 'seconds'
+		);
+
+		while (this.toc.length < this.tocLength) {
+			this.fetchRemainingTOCItems();
+			await wait(3000);
+		}
+	}
+
+	async fetchRemainingTOCItems() {
+		for (let i = 0; i < this.tocLength; i++) {
+			if (!this.getTOCItemById(i)) {
+				try {
+					await this.fetchTOCItem(i);
+				} catch (err) {
+					this.crazyflie.emit('error', err);
+				}
+			}
 		}
 	}
 
@@ -122,25 +145,46 @@ export class Logging {
 		const [ group, name ] = data.slice(2).toString().split('\u0000');
 		console.log('TOC Item', id, 'type', type, 'group', group, 'name', name);
 
-		this.toc.push({
+		const item: TOCItem = {
 			id,
 			type,
 			group,
 			name
-		});
+		};
 
-		console.log(`(${this.toc.length} / ${this.tocLength}) We are ${this.tocLength - this.toc.length} items left!`);
+		console.log(`(${this.toc.length} / ${this.tocLength}) We are ${this.tocLength - this.toc.length} items left!
+			Occurred ${(Date.now() - this.tocFetchHandle.getTime()) / 1000} seconds after toc received.`);
 
-		// If that was final block, telemetry is ready
-		if (this.tocLength >= this.toc.length) {
-			this.crazyflie.emit('telemetry ready');
-		} else {
-			try {
-				await this.fetchTOCItem(id + 1);
-			} catch (err) {
-				this.crazyflie.emit('error', err);
+		// If we successfully added a non-duplicate item and that was final block, telemetry is ready
+		if (this.addTOCItem(item) && this.tocLength === this.toc.length) {
+			this.crazyflie.emit('toc ready');
+		}
+	}
+
+	/**
+	 * Add TOC item to the TOC array as long as it isn't a duplicate
+	 */
+
+	private addTOCItem(item: TOCItem) {
+		// If there's an item already, then don't add
+		if (this.getTOCItemById(item.id)) {
+			return false;
+		}
+		this.toc.push(item);
+		return true;
+	}
+
+	/**
+	 * Get TOC item from the TOC array
+	 */
+
+	private getTOCItemById(id: number) {
+		for (const item of this.toc) {
+			if (item.id === id) {
+				return item;
 			}
 		}
+		return null;
 	}
 
 }

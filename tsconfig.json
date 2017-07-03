@@ -9,10 +9,7 @@
 		"pretty": true,
 		"sourceMap": true,
 		"sourceRoot": "src",
-		"target": "ES6",
-		"typeRoots": [
-			"./@types"
-		]
+		"target": "es2016"
 	},
 	"include": [
 		"src/**/*"

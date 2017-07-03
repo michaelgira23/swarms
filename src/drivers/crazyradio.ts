@@ -192,11 +192,13 @@ export class Crazyradio extends EventEmitter {
 
 	async findDrones() {
 		try {
+			const prevARC = this.options.arc;
 			await this.setAckRetryCount(1);
 			let drones: Uri[] = [];
 			for (const rate of Object.keys(DATA_RATES)) {
 				drones = drones.concat(await this.scanRange(DATA_RATES[rate]));
 			}
+			await this.setAckRetryCount(prevARC);
 			return Promise.resolve(drones);
 		} catch (err) {
 			return Promise.reject(err);
