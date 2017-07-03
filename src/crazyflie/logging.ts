@@ -53,7 +53,7 @@ export class Logging {
 	/**
 	 * Gets the table of contents from the Crazyflie and all the TOC items
 	 * Crazyflie will emit a 'toc done' event once TOC and items are retrieved
-	 * Required first in order to retrieve values
+	 * Required first in order to retrieve values and can take up to ~30 seconds
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#table_of_content_access)
 	 */
 
@@ -85,7 +85,7 @@ export class Logging {
 		}
 	}
 
-	async fetchRemainingTOCItems() {
+	private async fetchRemainingTOCItems() {
 		for (let i = 0; i < this.tocLength; i++) {
 			if (!this.getTOCItemById(i)) {
 				try {
@@ -102,7 +102,7 @@ export class Logging {
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#get_toc_item)
 	 */
 
-	fetchTOCItem(id: number) {
+	private fetchTOCItem(id: number) {
 		if (0 > id || id >= this.tocLength) {
 			return Promise.reject(`Id "${id}" is out of range! (0-${this.tocLength - 1} inclusive)`);
 		}

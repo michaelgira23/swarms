@@ -22,14 +22,19 @@ async function main() {
 
 		const drone = await radio.connect(drones[0]);
 
+		console.log('******************************');
+		console.log('Retrieving Crazyflie Table of Contents');
+		console.log('This could take up to ~30 seconds...');
+		console.log('******************************');
+
 		const telemetryStart = new Date();
 		await drone.logging.getTOC();
 
 		drone.on('toc ready', () => {
-			console.log('*************************');
-			console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}`);
+			console.log('******************************');
+			console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
 			console.log(`TOC is length ${drone.logging.tocLength}`);
-			console.log('*************************');
+			console.log('******************************');
 		});
 
 		drone.on('error', err => {

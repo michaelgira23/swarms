@@ -292,7 +292,7 @@ export class Crazyradio extends EventEmitter {
 				break;
 			case PORTS.LOGGING:
 				this.emit('logging', ackPack);
-				console.log('Logging!', ackPack);
+				// console.log('Logging!', ackPack);
 				break;
 			case PORTS.LINK_LAYER:
 				this.emit('link layer', ackPack);
