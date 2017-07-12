@@ -296,9 +296,9 @@ export class Crazyradio extends EventEmitter {
 				break;
 			case PORTS.LINK_LAYER:
 				this.emit('link layer', ackPack);
-				if (!ackPack.equals(Ack.emptyPing)) {
-					console.log('Link Layer!', ackPack);
-				}
+				// if (!ackPack.equals(Ack.emptyPing)) {
+				// 	console.log('Link Layer!', ackPack);
+				// }
 				break;
 			default:
 				this.emit('other', ackPack);
@@ -416,18 +416,18 @@ export class Crazyradio extends EventEmitter {
 	}
 
 	private sendVendorSetup(request: number, value: number, index = 0, data = BUFFERS.NOTHING) {
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			this.device.controlTransfer(
 				BM_REQUEST_TYPE,
 				request,
 				value,
 				index,
 				data,
-				(err, res) => {
+				err => {
 					if (err) {
 						reject(err);
 					} else {
-						resolve(res);
+						resolve();
 					}
 				}
 			);
@@ -435,18 +435,18 @@ export class Crazyradio extends EventEmitter {
 	}
 
 	private getVendorSetup(request: number, value: number, index: number, length: number) {
-		return new Promise((resolve, reject) => {
+		return new Promise<Buffer>((resolve, reject) => {
 			this.device.controlTransfer(
 				BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,
 				request,
 				value,
 				index,
 				length,
-				(err, res) => {
+				(err, buf) => {
 					if (err) {
 						reject(err);
 					} else {
-						resolve(res);
+						resolve(buf);
 					}
 				}
 			);

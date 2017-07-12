@@ -3,6 +3,8 @@ import { BUFFER_TYPES, LOGGING_CHANNELS, LOGGING_COMMANDS, LOGGING_TYPES, PORTS,
 import { Ack, Packet } from '../packet';
 import { wait } from '../utils';
 
+import * as fs from 'fs-extra';
+
 /**
  * Telemetry for the Crazyflie
  * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log)
@@ -79,11 +81,26 @@ export class Logging {
 		this.tocMaxPackets = types.int8.read(5);
 		this.tocMaxOperations = types.int8.read(6);
 
-		while (this.toc.length < this.tocLength) {
-			this.fetchRemainingTOCItems();
-			await wait(3000);
+		// See if TOC is cached first
+		const cache = await this.getTOCFromCache(this.tocCrc);
+
+		console.log('See if we\'ve cached already', cache);
+
+		if (cache) {
+			this.toc = cache;
+			this.crazyflie.emit('toc ready');
+		} else {
+			// Fall back to bombarding the Crazyflie with TOC item requests until it fully complies
+			while (this.toc.length < this.tocLength) {
+				this.fetchRemainingTOCItems();
+				await wait(3000);
+			}
 		}
 	}
+
+	/**
+	 * Loop through all TOC ids and see if we already have it. If not, retrieve it.
+	 */
 
 	private async fetchRemainingTOCItems() {
 		for (let i = 0; i < this.tocLength; i++) {
@@ -95,6 +112,63 @@ export class Logging {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Gets the complete TOC cache
+	 * Will return null if file doesn't exist or invalid JSON
+	 */
+
+	getTOCCache(): Promise<TOCCache> {
+		const path = this.crazyflie.options.cachePath;
+		return fs.pathExists(path)
+			.then(exists => {
+				if (!exists) {
+					return null;
+				}
+				return fs.readJson(path, { throws: false });
+			});
+	}
+
+	/**
+	 * Get TOC from cache according to cyclic redundancy check (checksum) value
+	 * Will return null if no crc in cache
+	 */
+
+	getTOCFromCache(crc: number) {
+		return this.getTOCCache()
+			.then(cache => {
+				if (cache && typeof cache[crc] !== 'undefined') {
+					return cache[crc];
+				}
+				return null;
+			});
+	}
+
+	/**
+	 * Save a TOC to cache
+	 */
+
+	cacheTOC(crc: number, items: TOCItem[]): Promise<void> {
+		const path = this.crazyflie.options.cachePath;
+		return this.getTOCCache()
+			.then(existingCache => {
+				if (!existingCache) {
+					existingCache = {};
+				}
+				existingCache[crc] = items;
+				// `fs as any` because Typescript picks the worng type definition in the overloaded method
+				return (fs as any).outputJson(path, existingCache, { spaces: '\t' });
+			});
+	}
+
+	/**
+	 * Deletes cache
+	 */
+
+	clearCache() {
+		const path = this.crazyflie.options.cachePath;
+		return fs.remove(path);
 	}
 
 	/**
@@ -139,6 +213,8 @@ export class Logging {
 
 		// If we successfully added a non-duplicate item and that was final block, telemetry is ready
 		if (this.addTOCItem(item) && this.tocLength === this.toc.length) {
+			// Cache TOC
+			await this.cacheTOC(this.tocCrc, this.toc);
 			this.crazyflie.emit('toc ready');
 		}
 	}
@@ -153,6 +229,8 @@ export class Logging {
 			return false;
 		}
 		this.toc.push(item);
+		this.toc.sort((a, b) => a.id - b.id);
+		this.crazyflie.emit('toc item', item);
 		return true;
 	}
 
@@ -169,6 +247,10 @@ export class Logging {
 		return null;
 	}
 
+}
+
+export interface TOCCache {
+	[crc: number]: TOCItem[];
 }
 
 export interface TOCItem {

@@ -4,6 +4,11 @@ import { Commander } from './commander';
 import { Logging } from './logging';
 
 import { EventEmitter } from 'events';
+import * as path from 'path';
+
+export const defaultCrazyflieOptions: CrazyflieOptions = {
+	cachePath: path.join(__dirname, '..', '..', 'cache.json')
+};
 
 /**
  * Class for controlling a Crazyflie
@@ -12,6 +17,7 @@ import { EventEmitter } from 'events';
 export class Crazyflie extends EventEmitter {
 
 	private initialized = false;
+	options: CrazyflieOptions = defaultCrazyflieOptions;
 
 	commander: Commander;
 	logging: Logging;
@@ -39,4 +45,8 @@ export class Crazyflie extends EventEmitter {
 		this.initialized = true;
 	}
 
+}
+
+export interface CrazyflieOptions {
+	cachePath: string;
 }

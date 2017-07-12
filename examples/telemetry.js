@@ -28,12 +28,21 @@ async function main() {
 		console.log('******************************');
 
 		const telemetryStart = new Date();
-		await drone.logging.getTOC();
+		// await drone.logging.getTOC();
+		await drone.logging.clearCache();
+
+		drone.on('toc item', item => {
+			console.log('******************************');
+			console.log(`Got TOC Item ${item.id}! After ${(Date.now() - telemetryStart) / 1000}s`);
+			console.log(`TOC item ${item.id + 1} / ${drone.logging.tocLength} (${(item.id + 1) / drone.logging.tocLength}%)`);
+			console.log('******************************');
+		});
 
 		drone.on('toc ready', () => {
 			console.log('******************************');
 			console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
 			console.log(`TOC is length ${drone.logging.tocLength}`);
+			console.log(drone.logging.toc);
 			console.log('******************************');
 		});
 
