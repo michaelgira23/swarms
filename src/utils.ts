@@ -41,6 +41,15 @@ export function toBinary(decimal: number, lengthMultipleOfFour = false, gapEvery
 }
 
 /**
+ * Rounds a number to a certain decimal place.
+ * Precision 0 by default.
+ */
+
+export function round(num: number, precision = 0) {
+	return _.round(num, precision);
+}
+
+/**
  * Returns a promise that resolves in n milliseconds
  */
 

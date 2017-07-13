@@ -1,5 +1,5 @@
 .DS_Store
 node_modules
 dist
-/cache.json
+/toc-cache.json
 *.log

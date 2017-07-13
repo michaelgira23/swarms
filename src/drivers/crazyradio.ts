@@ -156,7 +156,9 @@ export class Crazyradio extends EventEmitter {
 	 */
 
 	connect(uri: Uri) {
+		// Make sure intervals and timeouts are cleared first
 		this.disconnect();
+
 		return this.configure({
 			dataRate: uri.dataRate,
 			channel: uri.channel

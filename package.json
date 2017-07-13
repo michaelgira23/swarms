@@ -6,6 +6,7 @@
     "dist"
   ],
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "npm run lint",
     "lint": "tslint --type-check --project tsconfig.json \"src/**/*.ts\"",

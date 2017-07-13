@@ -9,7 +9,7 @@
 		"pretty": true,
 		"sourceMap": true,
 		"sourceRoot": "src",
-		"target": "es2016"
+		"target": "es2017"
 	},
 	"include": [
 		"src/**/*"

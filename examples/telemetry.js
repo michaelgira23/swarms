@@ -28,13 +28,15 @@ async function main() {
 		console.log('******************************');
 
 		const telemetryStart = new Date();
-		// await drone.logging.getTOC();
-		await drone.logging.clearCache();
+		await drone.logging.getTOC();
 
 		drone.on('toc item', item => {
+			const time = (Date.now() - telemetryStart) / 1000;
+			const nthItem = drone.logging.toc.length;
+			const percentage = swarms.utils.round((nthItem / drone.logging.tocLength) * 100, 2);
 			console.log('******************************');
-			console.log(`Got TOC Item ${item.id}! After ${(Date.now() - telemetryStart) / 1000}s`);
-			console.log(`TOC item ${item.id + 1} / ${drone.logging.tocLength} (${(item.id + 1) / drone.logging.tocLength}%)`);
+			console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
+			console.log(`TOC item ${nthItem} / ${drone.logging.tocLength} (${percentage}%)`);
 			console.log('******************************');
 		});
 

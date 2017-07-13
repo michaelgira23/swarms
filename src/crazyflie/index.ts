@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 import * as path from 'path';
 
 export const defaultCrazyflieOptions: CrazyflieOptions = {
-	cachePath: path.join(__dirname, '..', '..', 'cache.json')
+	cachePath: path.join(__dirname, '..', '..', 'toc-cache.json')
 };
 
 /**

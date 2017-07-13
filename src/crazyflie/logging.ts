@@ -84,8 +84,6 @@ export class Logging {
 		// See if TOC is cached first
 		const cache = await this.getTOCFromCache(this.tocCrc);
 
-		console.log('See if we\'ve cached already', cache);
-
 		if (cache) {
 			this.toc = cache;
 			this.crazyflie.emit('toc ready');
