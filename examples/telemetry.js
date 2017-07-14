@@ -27,12 +27,9 @@ async function main() {
 		console.log('This could take up to ~30 seconds...');
 		console.log('******************************');
 
-		const telemetryStart = new Date();
-		await drone.logging.getTOC();
-
 		drone.on('toc item', item => {
 			const time = (Date.now() - telemetryStart) / 1000;
-			const nthItem = drone.logging.toc.length;
+			const nthItem = drone.logging.toc.items.length;
 			const percentage = swarms.utils.round((nthItem / drone.logging.tocLength) * 100, 2);
 			console.log('******************************');
 			console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
@@ -40,13 +37,25 @@ async function main() {
 			console.log('******************************');
 		});
 
-		drone.on('toc ready', () => {
-			console.log('******************************');
-			console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
-			console.log(`TOC is length ${drone.logging.tocLength}`);
-			console.log(drone.logging.toc);
-			console.log('******************************');
-		});
+		const telemetryStart = new Date();
+		const toc = await drone.logging.getTOC();
+
+		console.log('******************************');
+		console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
+		console.log(`TOC is length ${drone.logging.tocLength}`);
+		console.log(drone.logging.toc);
+		console.log('******************************');
+
+		// Invoke getting of gyroscope data
+		// await drone.logging.startLogging([
+		// 	toc.getItem('gyro', 'x'),
+		// 	toc.getItem('gyro', 'y'),
+		// 	toc.getItem('gyro', 'z')
+		// ]);
+
+		// console.log('******************************');
+		// console.log('Logging finished!');
+		// console.log('******************************');
 
 		drone.on('error', err => {
 			console.log('Drone error!', err);

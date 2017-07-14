@@ -20,10 +20,6 @@ import { EventEmitter } from 'events';
 import * as _ from 'lodash';
 import * as usb from 'usb';
 
-/**
- * Class for controlling the Crazyradio
- */
-
 export class Crazyradio extends EventEmitter {
 
 	// Crazyradio options
@@ -59,6 +55,10 @@ export class Crazyradio extends EventEmitter {
 	// How many milliseconds after receiving a non-empty packet should we wait until sending another ping
 	// (for fallbackPingTimeout)
 	private packetResponseTimeout = 100;
+
+	/**
+	 * Class for controlling the Crazyradio
+	 */
 
 	constructor() {
 		super();

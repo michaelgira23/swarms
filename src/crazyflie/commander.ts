@@ -2,11 +2,6 @@ import { Crazyflie } from '.';
 import { PORTS } from '../constants';
 import { Packet } from '../packet';
 
-/**
- * Class for dealing with the 'commander' port
- * (https://wiki.bitcraze.io/doc:crazyflie:crtp:commander)
- */
-
 export class Commander {
 
 	currentSetpoint: Setpoint = {
@@ -15,6 +10,11 @@ export class Commander {
 		pitch: 0,
 		thrust: 0
 	};
+
+	/**
+	 * Class for dealing with the 'commander' port
+	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:commander)
+	 */
 
 	constructor(private crazyflie: Crazyflie) {
 

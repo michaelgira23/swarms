@@ -75,7 +75,10 @@ export const PORTS = {
 
 export const MAX_PAYLOAD_SIZE = 31;
 
-// Constants for the 'logging' port (telemetry)
+/**
+ * Constants for the 'logging' port of CRTP (telemetry)
+ * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log)
+ */
 
 export const LOGGING_CHANNELS = {
 	TOC      : 0, // Table of content access: Used for reading out the TOC
@@ -87,20 +90,58 @@ export const LOGGING_COMMANDS = {
 	TOC: {
 		GET_ITEM : 0, // Get an item from the TOC
 		GET_INFO : 1  // Get information about the TOC and the LOG subsystem implementation
+	},
+	LOG_CTRL: {
+		CREATE_BLOCK : 0,
+		APPEND_BLOCK : 1,
+		DELETE_BLOCK : 2,
+		START_BLOCK  : 3,
+		STOP_BLOCK   : 4,
+		RESET_LOG    : 5
 	}
 };
 
 // Logging types
 // (https://wiki.bitcraze.io/projects:crazyflie:firmware:log#firmware_usage)
-export const LOGGING_TYPES: { [id: number]: Type } = {
-	1 : 'uInt8',
-	2 : 'uInt16',
-	3 : 'uInt32',
-	4 : 'int8',
-	5 : 'int16',
-	6 : 'int32',
-	7 : 'float',
-	8 : 'fp16'
+export const LOGGING_TYPES: SortaEnum = {
+	uInt8  : 1,
+	uInt16 : 2,
+	uInt32 : 3,
+	int8   : 4,
+	int16  : 5,
+	int32  : 6,
+	float  : 7,
+	fp16   : 8
+};
+
+export function GET_LOGGING_TYPE(typeValue: number) {
+	for (const type of Object.keys(LOGGING_TYPES)) {
+		if (LOGGING_TYPES[type] === typeValue) {
+			return type;
+		}
+	}
+	return null;
+}
+
+// Possible errors
+// (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#variable_format)
+export const BLOCK_ERRORS: { [status: number]: { name: string, message: string } } = {
+	2: {
+		name: 'ENOENT',
+		message: 'Block or variable not found'
+	},
+	7: {
+		name: 'E2BIG',
+		message: 'Log block is too long'
+	},
+	8: {
+		name: 'ENOEXEC',
+		message: 'Unknown command received'
+	},
+	12: {
+		name: 'ENOMEM',
+		message: 'No memory to allocate Log Block or Log Item'
+	}
 };
 
 /**

@@ -3,10 +3,6 @@ import { toHex } from './utils';
 
 import * as _ from 'lodash';
 
-/**
- * Represents a packet to send to the Crazyflie
- */
-
 export class Packet {
 
 	port = 0;
@@ -14,6 +10,10 @@ export class Packet {
 
 	pointer = 0;
 	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE);
+
+	/**
+	 * Represents a packet to send to the Crazyflie
+	 */
 
 	constructor(data?: Buffer) {
 		if (data) {

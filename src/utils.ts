@@ -2,6 +2,7 @@
  * @file Random stuff used throughout the project
  */
 
+import { EventEmitter } from 'events';
 import * as _ from 'lodash';
 
 /**
@@ -56,5 +57,19 @@ export function round(num: number, precision = 0) {
 export function wait(milliseconds: number) {
 	return new Promise((resolve, reject) => {
 		setTimeout(resolve, milliseconds);
+	});
+}
+
+/**
+ * Wait until event is emitted
+ * @TODO Add timeout as well if event is never emitted
+ */
+
+export function waitUntilEvent(emitter: EventEmitter, eventName: string) {
+	return new Promise<any>((resolve, reject) => {
+		emitter.once(eventName, () => {
+			// Pass along everything emitted in event
+			resolve(...arguments);
+		});
 	});
 }

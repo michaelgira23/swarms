@@ -6,13 +6,13 @@ import { Readable, Writable } from 'stream';
 import * as usb from 'usb';
 import { InEndpointWithOn, OutEndpointWithOn } from '../usb-types-fix';
 
-/**
- * Stream from dongle --> PC
- */
-
 export class InStream extends Readable {
 
 	polling = false;
+
+	/**
+	 * Stream from dongle --> PC
+	 */
 
 	constructor(private endpoint: usb.InEndpoint) {
 		super();
@@ -47,11 +47,11 @@ export class InStream extends Readable {
 
 }
 
-/**
- * Stream from PC --> dongle
- */
-
 export class OutStream extends Writable {
+
+	/**
+	 * Stream from PC --> dongle
+	 */
 
 	constructor(private endpoint: usb.OutEndpoint) {
 		super({

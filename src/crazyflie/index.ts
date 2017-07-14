@@ -10,10 +10,6 @@ export const defaultCrazyflieOptions: CrazyflieOptions = {
 	cachePath: path.join(__dirname, '..', '..', 'toc-cache.json')
 };
 
-/**
- * Class for controlling a Crazyflie
- */
-
 export class Crazyflie extends EventEmitter {
 
 	private initialized = false;
@@ -22,11 +18,20 @@ export class Crazyflie extends EventEmitter {
 	commander: Commander;
 	logging: Logging;
 
+	/**
+	 * Class for controlling a Crazyflie
+	 */
+
 	constructor(public radio: Crazyradio) {
 		super();
 
 		this.commander = new Commander(this);
 		this.logging = new Logging(this);
+
+		// Forward all errors to the global Crazyflie 'error' event
+		this.logging.on('error', (err: any) => {
+			this.emit('error', err);
+		});
 	}
 
 	async init() {
