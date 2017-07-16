@@ -2,6 +2,8 @@
 
 The ultimate node.js client for controlling Bitcraze Crazyflie 2.0 drones
 
+Warning: This projects is currently unstable and going under heavy active development. Check back later as the project matures!
+
 # Motive
 
 There were too many outdated and undocumented node.js libraries out there for programming Crazyflies. This package's goal is to fix that.
