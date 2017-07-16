@@ -8,7 +8,7 @@ export class Packet {
 	port = 0;
 	channel = 0;
 
-	pointer = 0;
+	length = 0;
 	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE);
 
 	/**
@@ -35,12 +35,12 @@ export class Packet {
 		if (typeof typeData === 'undefined') {
 			throw new Error(`Invalid type "${type}"!`);
 		}
-		if (this.pointer + typeData.size > this.data.length) {
+		if (this.length + typeData.size > this.data.length) {
 			throw new Error(`Writing type "${type}" exceeds payload length of ${this.data.length}!`);
 		}
 
-		typeData.write(value, this.pointer);
-		this.pointer += typeData.size;
+		typeData.write(value, this.length);
+		this.length += typeData.size;
 
 		// For chainability
 		return this;
@@ -70,7 +70,7 @@ export class Packet {
 		const header = this.getHeader();
 
 		// Slice data buffer to the actual payload we used
-		const payload = this.data.slice(0, this.pointer);
+		const payload = this.data.slice(0, this.length);
 
 		if (!serialPort) {
 			return Buffer.concat([

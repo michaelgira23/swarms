@@ -286,25 +286,18 @@ export class Crazyradio extends EventEmitter {
 				break;
 			case PORTS.PARAMETERS:
 				this.emit('parameters', ackPack);
-				console.log('Parameters!', ackPack);
 				break;
 			case PORTS.COMMANDER:
 				this.emit('commander', ackPack);
-				console.log('Commander!', ackPack);
 				break;
 			case PORTS.LOGGING:
 				this.emit('logging', ackPack);
-				// console.log('Logging!', ackPack);
 				break;
 			case PORTS.LINK_LAYER:
 				this.emit('link layer', ackPack);
-				// if (!ackPack.equals(Ack.emptyPing)) {
-				// 	console.log('Link Layer!', ackPack);
-				// }
 				break;
 			default:
 				this.emit('other', ackPack);
-				console.log('Other!', ackPack);
 				break;
 		}
 

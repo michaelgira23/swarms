@@ -18,11 +18,11 @@ import * as fs from 'fs-extra';
 
 export class Logging extends EventEmitter {
 
-	// Table of contents
-
-	// How many items in the table of contents
+	// Table of Contents
+	toc: TOC = new TOC();
+	// How many items in the table of contents according to the Crazyflie
 	tocLength: number;
-	// Cyclic redundancy check - checksum for possible TOC caching
+	// Cyclic redundancy check - checksum for TOC caching
 	tocCrc: number;
 	// Max amount of packets that can be programmed into the copter
 	tocMaxPackets: number;
@@ -30,10 +30,14 @@ export class Logging extends EventEmitter {
 	// (1 operation = 1 log variable retrieval programming)
 	tocMaxOperations: number;
 
-	toc: TOC = new TOC();
-
+	// Keep track of blocks
+	// (A block is a set of variables that the Crazyflie sends back at certain intervals)
+	blocks: Block[] = [];
+	// Counter for assigning block ids
 	nextBlockId = 0;
-	blocks: Block[];
+
+	// Emit all logging variables from the `data` property
+	data = new EventEmitter();
 
 	/**
 	 * Telemetry for the Crazyflie
@@ -62,6 +66,7 @@ export class Logging extends EventEmitter {
 						this.handleBlock(ackPack.data);
 						break;
 					case LOGGING_CHANNELS.LOG_DATA:
+						this.handleLogData(ackPack.data);
 						break;
 					default:
 						this.emit('error', `Unrecognized logging channel "${ackPack.data[0]}"!`);
@@ -88,13 +93,7 @@ export class Logging extends EventEmitter {
 		packet.write('int8', LOGGING_COMMANDS.TOC.GET_INFO);
 
 		return this.crazyflie.radio.sendPacket(packet)
-			.then(() => new Promise<TOC>((resolve, reject) => {
-				this.once('toc ready', () => {
-					// Pass along everything emitted in event
-					resolve(...arguments);
-				});
-			}));
-			// .then(waitUntilEvent(this, 'toc ready'));
+			.then(waitUntilEvent<TOC>(this, 'toc ready'));
 	}
 
 	/**
@@ -251,20 +250,41 @@ export class Logging extends EventEmitter {
 	}
 
 	/**
-	 * Creates a block of variables and activates it.
-	 * You can access these variables using the event name which correlates to the item's group name.
+	 * Start receiving data of TOC items. Creates a block of variables and activates it.
+	 * You can access these variables using various events; check the documentation.
 	 * You can optionally specify the interval in milliseconds for the Crazyflie to ping data back to the computer.
-	 * (Rounds to nearest 10ms)
+	 * (Floors to the nearest 10ms interval)
 	 */
 
-	async startLogging(variables: TOCItem[], millisecondInterval = 100) {
+	async start(variables: TOCItem[], millisecondInterval = 100) {
+		const period = Math.floor(millisecondInterval / 10);
+		if (0 >= period || period > 0xFF) {
+			return Promise.reject(`Interval "${millisecondInterval}ms" is out of range 10ms and 255000ms!`);
+		}
+
 		const block: Block = {
 			id: this.nextBlockId++,
 			variables
 		};
 		this.blocks.push(block);
 
-		return this.createBlock(block);
+		return this.createBlock(block)
+			.then(() => this.startBlock(block.id, period));
+	}
+
+	/**
+	 * Gets a block with a specified id from the `block` array. Not Crazyflie.
+	 */
+
+	getBlock(id: number) {
+		let targetBlock = null;
+		for (const block of this.blocks) {
+			if (block.id === id) {
+				targetBlock = block;
+				break;
+			}
+		}
+		return targetBlock;
 	}
 
 	/**
@@ -290,12 +310,136 @@ export class Logging extends EventEmitter {
 		}
 
 		return this.crazyflie.radio.sendPacket(packet)
-			.then(() => new Promise<{ error: Error, blockId: number }>((resolve, reject) => {
-				this.once('create block', (data: { error: Error, blockId: number }) => {
-					resolve(data);
-				});
-			}));
-			// .then(waitUntilEvent(this, 'create block'));;
+			.then(waitUntilEvent<void>(this, 'create block'));
+	}
+
+	/**
+	 * Appends variables to a block
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_settings_access_port_5_channel_1)
+	 */
+
+	appendToBlock(blockId: number, variables: TOCItem[]) {
+		const block = this.getBlock(blockId);
+		if (!block) {
+			return Promise.reject(`Invalid block id "${blockId}"!`);
+		}
+
+		const packet = new Packet();
+		packet.port = PORTS.LOGGING;
+		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+
+		packet
+			.write('int8', LOGGING_COMMANDS.LOG_CTRL.APPEND_BLOCK)
+			.write('int8', block.id);
+
+		for (const variable of variables) {
+			// @TODO test if this works...
+			block.variables.push(variable);
+			const type = LOGGING_TYPES[variable.type];
+			packet
+				.write('int8', type << 4 | type)
+				.write('int8', variable.id);
+		}
+
+		return this.crazyflie.radio.sendPacket(packet)
+			.then(waitUntilEvent<void>(this, 'append block'));
+	}
+
+	/**
+	 * Deletes a block
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_settings_access_port_5_channel_1)
+	 */
+
+	deleteBlock(blockId: number) {
+		let deleted = false;
+		for (let i = 0; i < this.blocks.length; i++) {
+			if (this.blocks[i].id === blockId) {
+				this.blocks.splice(i--, 1);
+				deleted = true;
+			}
+		}
+		if (!deleted) {
+			return Promise.resolve();
+		}
+
+		// If we deleted something, delete on Crazyflie too
+		const packet = new Packet();
+		packet.port = PORTS.LOGGING;
+		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+
+		packet
+			.write('int8', LOGGING_COMMANDS.LOG_CTRL.DELETE_BLOCK)
+			.write('int8', blockId);
+
+		return this.crazyflie.radio.sendPacket(packet)
+			.then(waitUntilEvent<void>(this, 'delete block'));
+	}
+
+	/**
+	 * Activate a block so logging data is sent back to computer at a certain interval.
+	 * Interval is specified in increments of 10ms (1 = 10ms, 2 = 20ms, etc...)
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_settings_access_port_5_channel_1)
+	 */
+
+	startBlock(blockId: number, interval: number) {
+		if (0 >= interval || interval > 0xFF) {
+			return Promise.reject(`Interval "${interval}" is out of range 1 to 255!`);
+		}
+		if (!this.getBlock(blockId)) {
+			return Promise.reject(`Invalid block id "${blockId}"!`);
+		}
+
+		const packet = new Packet();
+		packet.port = PORTS.LOGGING;
+		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+
+		packet
+			.write('int8', LOGGING_COMMANDS.LOG_CTRL.START_BLOCK)
+			.write('int8', blockId)
+			.write('int8', interval);
+
+		return this.crazyflie.radio.sendPacket(packet)
+			.then(waitUntilEvent<void>(this, 'start block'));
+	}
+
+	/**
+	 * Deactivates a block so no more logging data is sent from that block
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_settings_access_port_5_channel_1)
+	 */
+
+	stopBlock(blockId: number) {
+		if (!this.getBlock(blockId)) {
+			return Promise.reject(`Invalid block id "${blockId}"!`);
+		}
+
+		const packet = new Packet();
+		packet.port = PORTS.LOGGING;
+		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+
+		packet
+			.write('int8', LOGGING_COMMANDS.LOG_CTRL.DELETE_BLOCK)
+			.write('int8', blockId);
+
+		return this.crazyflie.radio.sendPacket(packet)
+			.then(waitUntilEvent<void>(this, 'delete block'));
+	}
+
+	/**
+	 * Stop and delete all blocks
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_settings_access_port_5_channel_1)
+	 */
+
+	resetLog() {
+		this.blocks = [];
+
+		const packet = new Packet();
+		packet.port = PORTS.LOGGING;
+		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+
+		packet.write('int8', LOGGING_COMMANDS.LOG_CTRL.RESET_LOG);
+
+		return this.crazyflie.radio.sendPacket(packet)
+			.then(waitUntilEvent<void>(this, 'reset log'));
 	}
 
 	/**
@@ -334,11 +478,60 @@ export class Logging extends EventEmitter {
 				this.emit('stop block', { error, blockId });
 				break;
 			case LOGGING_COMMANDS.LOG_CTRL.RESET_LOG:
-				this.emit('reset log', { error, blockId });
+				this.emit('reset log', { error });
 				break;
 			default:
 				this.emit('error', `Unrecognized block command "${command}"!`);
 				break;
+		}
+	}
+
+	/**
+	 * Handle incoming log data
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_data_access_port_5_channel_2)
+	 */
+
+	private handleLogData(data: Buffer) {
+		const types = BUFFER_TYPES(data);
+
+		const blockId = types.int8.read(0);
+		// Timestamp is different because it's a 3-byte integer
+		const timestamp = data.readIntLE(1, 3);
+
+		// Get block so we know what variables are and their data types
+		const block = this.getBlock(blockId);
+
+		if (!block) {
+			this.emit('error', `Received data for block id "${blockId}" but we don't have that block!`);
+			return;
+		}
+
+		const logData: { [group: string]: { [name: string]: number } } = {};
+
+		let pointer = 4;
+		for (const variable of block.variables) {
+			const type = types[variable.type];
+			const logDatum = type.read(pointer);
+
+			if (typeof logData[variable.group] === 'undefined') {
+				logData[variable.group] = {};
+			}
+			logData[variable.group][variable.name] = logDatum;
+
+			pointer += type.size;
+		}
+
+		// Global `*` event
+		this.data.emit('*', logData);
+
+		// Group-wide event
+		for (const group of Object.keys(logData)) {
+			this.data.emit(group, logData[group]);
+
+			// Specific `group.name` event
+			for (const name of Object.keys(logData[group])) {
+				this.data.emit(`${group}.${name}`, logData[group][name]);
+			}
 		}
 	}
 

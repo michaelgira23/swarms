@@ -22,6 +22,10 @@ async function main() {
 
 		const drone = await radio.connect(drones[0]);
 
+		drone.on('error', err => {
+			console.log('Drone error!', err);
+		});
+
 		console.log('******************************');
 		console.log('Retrieving Crazyflie Table of Contents');
 		console.log('This could take up to ~30 seconds...');
@@ -42,23 +46,42 @@ async function main() {
 
 		console.log('******************************');
 		console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
-		console.log(`TOC is length ${drone.logging.tocLength}`);
-		console.log(drone.logging.toc);
+		console.log(`TOC is of length ${drone.logging.tocLength} and has a checksum of ${drone.logging.tocCrc}`);
+		console.log('******************************');
+
+		console.log('******************************');
+		console.log('Starting gyro data. This could take some time as well...');
 		console.log('******************************');
 
 		// Invoke getting of gyroscope data
-		// await drone.logging.startLogging([
-		// 	toc.getItem('gyro', 'x'),
-		// 	toc.getItem('gyro', 'y'),
-		// 	toc.getItem('gyro', 'z')
-		// ]);
+		await drone.logging.start([
+			toc.getItem('gyro', 'x'),
+			toc.getItem('gyro', 'y'),
+			toc.getItem('gyro', 'z')
+		]);
 
-		// console.log('******************************');
-		// console.log('Logging finished!');
-		// console.log('******************************');
+		console.log('******************************');
+		console.log('Telemetry initialization finished!');
+		console.log('******************************');
 
-		drone.on('error', err => {
-			console.log('Drone error!', err);
+		drone.logging.data.on('*', data => {
+			console.log('Logging data:', data);
+		});
+
+		drone.logging.data.on('gyro', data => {
+			console.log('Gyro data:', data);
+		});
+
+		drone.logging.data.on('gyro.x', data => {
+			console.log('Gyro X data:', data);
+		});
+
+		drone.logging.data.on('gyro.y', data => {
+			console.log('Gyro Y data:', data);
+		});
+
+		drone.logging.data.on('gyro.z', data => {
+			console.log('Gyro Z data:', data);
 		});
 
 	} catch (err) {

@@ -65,11 +65,10 @@ export function wait(milliseconds: number) {
  * @TODO Add timeout as well if event is never emitted
  */
 
-export function waitUntilEvent(emitter: EventEmitter, eventName: string) {
-	return new Promise<any>((resolve, reject) => {
-		emitter.once(eventName, () => {
-			// Pass along everything emitted in event
-			resolve(...arguments);
+export function waitUntilEvent<T>(emitter: EventEmitter, eventName: string) {
+	return () => new Promise<T>((resolve, reject) => {
+		emitter.once(eventName, (data: T) => {
+			resolve(data);
 		});
 	});
 }
