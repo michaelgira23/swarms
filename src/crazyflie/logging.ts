@@ -1,4 +1,4 @@
-import { Crazyflie } from '..';
+import { Crazyflie } from '.';
 import {
 	BLOCK_ERRORS,
 	BUFFER_TYPES,
@@ -8,10 +8,11 @@ import {
 	LOGGING_TYPES,
 	PORTS,
 	Type
-} from '../../constants';
-import { Ack, Packet } from '../../packet';
-import { wait, waitUntilEvent } from '../../utils';
-import { TOC } from './toc';
+} from '../constants';
+import { Ack, Packet } from '../packet';
+import { wait, waitUntilEvent } from '../utils';
+import { TOCItem } from './toc';
+import { TOC_TYPES, TOCFetcher } from './toc-fetcher';
 
 import { EventEmitter } from 'events';
 import * as fs from 'fs-extra';
@@ -19,16 +20,7 @@ import * as fs from 'fs-extra';
 export class Logging extends EventEmitter {
 
 	// Table of Contents
-	toc: TOC = new TOC();
-	// How many items in the table of contents according to the Crazyflie
-	tocLength: number;
-	// Cyclic redundancy check - checksum for TOC caching
-	tocCrc: number;
-	// Max amount of packets that can be programmed into the copter
-	tocMaxPackets: number;
-	// Max amount of operations that can be programmed into the copter
-	// (1 operation = 1 log variable retrieval programming)
-	tocMaxOperations: number;
+	tocFetcher = new TOCFetcher(this.crazyflie, TOC_TYPES.LOG);
 
 	// Keep track of blocks
 	// (A block is a set of variables that the Crazyflie sends back at certain intervals)
@@ -40,7 +32,7 @@ export class Logging extends EventEmitter {
 	data = new EventEmitter();
 
 	/**
-	 * Telemetry for the Crazyflie
+	 * Class for dealing with the 'logging' port (telemetry)
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log)
 	 */
 
@@ -55,10 +47,10 @@ export class Logging extends EventEmitter {
 						// Find out which command
 						switch (ackPack.data[0]) {
 							case LOGGING_COMMANDS.TOC.GET_ITEM:
-								this.handleTOCItem(ackPack.data.slice(1));
+								this.tocFetcher.handleTOCItem(ackPack.data.slice(1));
 								break;
 							case LOGGING_COMMANDS.TOC.GET_INFO:
-								this.handleTOC(ackPack.data.slice(1));
+								this.tocFetcher.handleTOCInfo(ackPack.data.slice(1));
 								break;
 						}
 						break;
@@ -76,177 +68,6 @@ export class Logging extends EventEmitter {
 				this.emit('error', err);
 			}
 		});
-	}
-
-	/**
-	 * Gets the table of contents from the Crazyflie.
-	 * Crazyflie will also emit a 'toc ready' event once TOC and items are retrieved.
-	 * TOC is required to retrieve logging values. Fetching can take up to ~30 seconds.
-	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#table_of_content_access)
-	 */
-
-	getTOC() {
-		const packet = new Packet();
-		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.TOC;
-
-		packet.write('int8', LOGGING_COMMANDS.TOC.GET_INFO);
-
-		return this.crazyflie.radio.sendPacket(packet)
-			.then(waitUntilEvent<TOC>(this, 'toc ready'));
-	}
-
-	/**
-	 * Handle TOC response
-	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#get_info)
-	 */
-
-	private async handleTOC(data: Buffer) {
-		const types = BUFFER_TYPES(data);
-		this.tocLength = types.int8.read(0);
-		this.tocCrc = types.int32.read(1);
-		this.tocMaxPackets = types.int8.read(5);
-		this.tocMaxOperations = types.int8.read(6);
-
-		// See if TOC is cached first
-		const cache = await this.getTOCFromCache(this.tocCrc);
-
-		if (cache) {
-			this.toc = cache;
-			this.emit('toc ready', this.toc);
-		} else {
-			// Fall back to bombarding the Crazyflie with TOC item requests until it fully complies
-			while (this.toc.items.length < this.tocLength) {
-				this.fetchRemainingTOCItems();
-				await wait(3000);
-			}
-		}
-	}
-
-	/**
-	 * Loop through all TOC ids and see if we already have it. If not, retrieve it.
-	 */
-
-	private async fetchRemainingTOCItems() {
-		for (let i = 0; i < this.tocLength; i++) {
-			if (!this.toc.getItemById(i)) {
-				try {
-					await this.fetchTOCItem(i);
-				} catch (err) {
-					this.emit('error', err);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Gets the complete TOC cache
-	 * Will return null if file doesn't exist or invalid JSON
-	 */
-
-	getTOCCache(): Promise<TOCCache> {
-		const path = this.crazyflie.options.cachePath;
-		return fs.pathExists(path)
-			.then(exists => {
-				if (!exists) {
-					return null;
-				}
-				return fs.readJson(path, { throws: false });
-			});
-	}
-
-	/**
-	 * Get TOC from cache according to cyclic redundancy check (checksum) value
-	 * Will return null if no crc in cache
-	 */
-
-	getTOCFromCache(crc: number) {
-		return this.getTOCCache()
-			.then(cache => {
-				if (cache && typeof cache[crc] !== 'undefined') {
-					return new TOC(cache[crc]);
-				}
-				return null;
-			});
-	}
-
-	/**
-	 * Save a TOC to cache
-	 */
-
-	cacheTOC(crc: number, items: TOCItem[]): Promise<void> {
-		const path = this.crazyflie.options.cachePath;
-		return this.getTOCCache()
-			.then(existingCache => {
-				if (!existingCache) {
-					existingCache = {};
-				}
-				existingCache[crc] = items;
-				// `fs as any` because Typescript picks the worng type definition in the overloaded method
-				return (fs as any).outputJson(path, existingCache, { spaces: '\t' });
-			});
-	}
-
-	/**
-	 * Deletes cache
-	 */
-
-	clearCache() {
-		const path = this.crazyflie.options.cachePath;
-		return fs.remove(path);
-	}
-
-	/**
-	 * Fetch TOC item from the Crazyflie
-	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#get_toc_item)
-	 */
-
-	private fetchTOCItem(id: number) {
-		if (0 > id || id >= this.tocLength) {
-			return Promise.reject(`Id "${id}" is out of range! (0-${this.tocLength - 1} inclusive)`);
-		}
-
-		const packet = new Packet();
-		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.TOC;
-
-		packet
-			.write('int8', LOGGING_COMMANDS.TOC.GET_ITEM)
-			.write('int8', id);
-
-		return this.crazyflie.radio.sendPacket(packet);
-	}
-
-	/**
-	 * Handle TOC item response
-	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#get_toc_item)
-	 */
-
-	private async handleTOCItem(data: Buffer) {
-		const types = BUFFER_TYPES(data);
-
-		const id = types.int8.read(0);
-		const type = GET_LOGGING_TYPE(types.int8.read(1));
-		const [ group, name ] = data.slice(2).toString().split('\u0000');
-
-		const item: TOCItem = {
-			id,
-			type,
-			group,
-			name
-		};
-
-		// Add TOC item if it isn't a duplicate
-		if (this.toc.addItem(item)) {
-			// We should tell somebody
-			this.emit('toc item', item);
-
-			// If that was the last item, cache TOC and alert the others!
-			if (this.tocLength === this.toc.items.length) {
-				await this.cacheTOC(this.tocCrc, this.toc.items);
-				this.emit('toc ready', this.toc);
-			}
-		}
 	}
 
 	/**
@@ -540,15 +361,4 @@ export class Logging extends EventEmitter {
 export interface Block {
 	id: number;
 	variables: TOCItem[];
-}
-
-export interface TOCCache {
-	[crc: number]: TOCItem[];
-}
-
-export interface TOCItem {
-	id: number;
-	type: string;
-	group: string;
-	name: string;
 }

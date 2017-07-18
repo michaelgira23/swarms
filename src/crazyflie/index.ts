@@ -2,12 +2,13 @@ import { Crazyradio } from '../drivers/crazyradio';
 
 import { Commander } from './commander';
 import { Logging } from './logging';
+import { Parameters } from './parameters';
 
 import { EventEmitter } from 'events';
 import * as path from 'path';
 
 export const defaultCrazyflieOptions: CrazyflieOptions = {
-	cachePath: path.join(__dirname, '..', '..', 'toc-cache.json')
+	cacheDir: path.join(__dirname, '..', '..', 'cache')
 };
 
 export class Crazyflie extends EventEmitter {
@@ -15,8 +16,9 @@ export class Crazyflie extends EventEmitter {
 	private initialized = false;
 	options: CrazyflieOptions = defaultCrazyflieOptions;
 
-	commander: Commander;
-	logging: Logging;
+	commander = new Commander(this);
+	parameters = new Parameters(this);
+	logging = new Logging(this);
 
 	/**
 	 * Class for controlling a Crazyflie
@@ -24,9 +26,6 @@ export class Crazyflie extends EventEmitter {
 
 	constructor(public radio: Crazyradio) {
 		super();
-
-		this.commander = new Commander(this);
-		this.logging = new Logging(this);
 
 		// Forward all errors to the global Crazyflie 'error' event
 		this.logging.on('error', (err: any) => {
@@ -53,5 +52,5 @@ export class Crazyflie extends EventEmitter {
 }
 
 export interface CrazyflieOptions {
-	cachePath: string;
+	cacheDir: string;
 }

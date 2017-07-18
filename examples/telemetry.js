@@ -31,22 +31,22 @@ async function main() {
 		console.log('This could take up to ~30 seconds...');
 		console.log('******************************');
 
-		drone.on('toc item', item => {
+		drone.logging.tocFetcher.on('toc item', item => {
 			const time = (Date.now() - telemetryStart) / 1000;
-			const nthItem = drone.logging.toc.items.length;
-			const percentage = swarms.utils.round((nthItem / drone.logging.tocLength) * 100, 2);
+			const nthItem = drone.logging.tocFetcher.toc.items.length;
+			const percentage = swarms.utils.round((nthItem / drone.logging.tocFetcher.length) * 100, 2);
 			console.log('******************************');
 			console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
-			console.log(`TOC item ${nthItem} / ${drone.logging.tocLength} (${percentage}%)`);
+			console.log(`TOC item ${nthItem} / ${drone.logging.tocFetcher.length} (${percentage}%)`);
 			console.log('******************************');
 		});
 
 		const telemetryStart = new Date();
-		const toc = await drone.logging.getTOC();
+		const toc = await drone.logging.tocFetcher.start();
 
 		console.log('******************************');
 		console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
-		console.log(`TOC is of length ${drone.logging.tocLength} and has a checksum of ${drone.logging.tocCrc}`);
+		console.log(`TOC is of length ${drone.logging.tocFetcher.length} and has a checksum of ${drone.logging.tocFetcher.crc}`);
 		console.log('******************************');
 
 		console.log('******************************');

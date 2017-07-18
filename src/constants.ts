@@ -76,6 +76,63 @@ export const PORTS = {
 export const MAX_PAYLOAD_SIZE = 31;
 
 /**
+ * Constants for the 'parameters' port of CRTP
+ * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param)
+ */
+
+export const PARAM_CHANNELS = {
+	TOC   : 0,
+	READ  : 1,
+	WRITE : 2,
+	MISC  : 3
+};
+
+// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
+export const PARAM_COMMANDS = {
+	TOC: {
+		RESET_POINTER : 0,
+		NEXT_ELEMENT  : 1,
+		GET_INFO      : 2
+	},
+	MISC: {
+		SET_BY_NAME : 0
+	}
+};
+
+// Like commands, but they come from the Crazyflie
+// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
+export const PARAM_DOWNSTREAM_MESSAGES = {
+	LAST_ELEMENT : 0,
+	TOC_ELEMENT  : 1,
+	TOC_INFO     : 2
+};
+
+// Parameter types
+// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
+export const PARAM_TYPES: SortaEnum = {
+	int8   : 0,
+	int16  : 1,
+	int32  : 2,
+	int64  : 3,
+	fp16   : 5,
+	float  : 6,
+	double : 7,
+	uInt8  : 8,
+	uInt16 : 9,
+	uInt32 : 10,
+	uInt64 : 11
+};
+
+export function GET_PARAM_TYPE(typeValue: number) {
+	for (const type of Object.keys(PARAM_TYPES)) {
+		if (PARAM_TYPES[type] === typeValue) {
+			return type;
+		}
+	}
+	return null;
+}
+
+/**
  * Constants for the 'logging' port of CRTP (telemetry)
  * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log)
  */

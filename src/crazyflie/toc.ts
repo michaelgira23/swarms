@@ -1,5 +1,3 @@
-import { TOCItem } from '.';
-
 export class TOC {
 
 	/**
@@ -53,4 +51,11 @@ export class TOC {
 		return null;
 	}
 
+}
+
+export interface TOCItem {
+	id: number;
+	type: string;
+	group: string;
+	name: string;
 }
