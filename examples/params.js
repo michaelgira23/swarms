@@ -46,7 +46,7 @@ async function main() {
 		const toc = await drone.parameters.tocFetcher.start();
 
 		console.log('******************************');
-		console.log(`Telemetry ready! After ${(Date.now() - parametersStart) / 1000}s`);
+		console.log(`Parameters ready! After ${(Date.now() - parametersStart) / 1000}s`);
 		console.log(`TOC is of length ${drone.parameters.tocFetcher.length} and has a checksum of ${drone.parameters.tocFetcher.crc}`);
 		console.log('******************************');
 

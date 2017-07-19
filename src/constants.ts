@@ -75,40 +75,48 @@ export const PORTS = {
 
 export const MAX_PAYLOAD_SIZE = 31;
 
-/**
- * Constants for the 'parameters' port of CRTP
- * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param)
- */
-
-export const PARAM_CHANNELS = {
-	TOC   : 0,
-	READ  : 1,
-	WRITE : 2,
-	MISC  : 3
-};
-
-// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
-export const PARAM_COMMANDS = {
-	TOC: {
-		RESET_POINTER : 0,
-		NEXT_ELEMENT  : 1,
-		GET_INFO      : 2
+export const CHANNELS = {
+	TOC: 0,
+	// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#parameters)
+	PARAM: {
+		READ  : 1,
+		WRITE : 2,
+		MISC  : 3 // Miscellaneous commands
 	},
-	MISC: {
-		SET_BY_NAME : 0
+	// (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#communication_protocol)
+	LOG: {
+		CTRL : 1, // Used for adding/removing/starting/pausing log blocks
+		DATA : 2  // Used to send log data from the Crazyflie to the client
 	}
 };
 
-// Like commands, but they come from the Crazyflie
-// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
-export const PARAM_DOWNSTREAM_MESSAGES = {
-	LAST_ELEMENT : 0,
-	TOC_ELEMENT  : 1,
-	TOC_INFO     : 2
+export const COMMANDS = {
+	// TOC commands for both logging and parameters (you just change the port)
+	// (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#table_of_content_access)
+	TOC: {
+		GET_ITEM : 0, // Get an item from the TOC
+		GET_INFO : 1  // Get information about the TOC including length and checksum for caching
+	},
+	// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#misc_commands)
+	PARAM_MISC: {
+		SET_BY_NAME : 0
+	},
+	// (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#log_control)
+	LOG_CTRL: {
+		CREATE_BLOCK : 0,
+		APPEND_BLOCK : 1,
+		DELETE_BLOCK : 2,
+		START_BLOCK  : 3,
+		STOP_BLOCK   : 4,
+		RESET_LOG    : 5
+	}
 };
 
-// Parameter types
-// (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
+/**
+ * Parameter types
+ * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
+ */
+
 export const PARAM_TYPES: SortaEnum = {
 	int8   : 0,
 	int16  : 1,
@@ -133,33 +141,10 @@ export function GET_PARAM_TYPE(typeValue: number) {
 }
 
 /**
- * Constants for the 'logging' port of CRTP (telemetry)
- * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log)
+ * Logging types
+ * (https://wiki.bitcraze.io/projects:crazyflie:firmware:log#firmware_usage)
  */
 
-export const LOGGING_CHANNELS = {
-	TOC      : 0, // Table of content access: Used for reading out the TOC
-	LOG_CTRL : 1, // Log control: Used for adding/removing/starting/pausing log blocks
-	LOG_DATA : 2  // Log data: Used to send log data from the Crazyflie to the client
-};
-
-export const LOGGING_COMMANDS = {
-	TOC: {
-		GET_ITEM : 0, // Get an item from the TOC
-		GET_INFO : 1  // Get information about the TOC and the LOG subsystem implementation
-	},
-	LOG_CTRL: {
-		CREATE_BLOCK : 0,
-		APPEND_BLOCK : 1,
-		DELETE_BLOCK : 2,
-		START_BLOCK  : 3,
-		STOP_BLOCK   : 4,
-		RESET_LOG    : 5
-	}
-};
-
-// Logging types
-// (https://wiki.bitcraze.io/projects:crazyflie:firmware:log#firmware_usage)
 export const LOGGING_TYPES: SortaEnum = {
 	uInt8  : 1,
 	uInt16 : 2,
@@ -180,8 +165,11 @@ export function GET_LOGGING_TYPE(typeValue: number) {
 	return null;
 }
 
-// Possible errors
-// (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#variable_format)
+/**
+ * Possible logging errors
+ * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#variable_format)
+ */
+
 export const BLOCK_ERRORS: { [status: number]: { name: string, message: string } } = {
 	2: {
 		name: 'ENOENT',
@@ -202,7 +190,7 @@ export const BLOCK_ERRORS: { [status: number]: { name: string, message: string }
 };
 
 /**
- * Buffer Constants
+ * Buffers used for things
  */
 
 export const BUFFERS = {

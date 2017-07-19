@@ -1,14 +1,5 @@
 import { Crazyflie } from '.';
-import {
-	BLOCK_ERRORS,
-	BUFFER_TYPES,
-	GET_LOGGING_TYPE,
-	LOGGING_CHANNELS,
-	LOGGING_COMMANDS,
-	LOGGING_TYPES,
-	PORTS,
-	Type
-} from '../constants';
+import { BLOCK_ERRORS, BUFFER_TYPES, CHANNELS, COMMANDS, LOGGING_TYPES, PORTS } from '../constants';
 import { Ack, Packet } from '../packet';
 import { wait, waitUntilEvent } from '../utils';
 import { TOCItem } from './toc';
@@ -43,21 +34,21 @@ export class Logging extends EventEmitter {
 			try {
 				// Route the packet to the correct handler function
 				switch (ackPack.channel) {
-					case LOGGING_CHANNELS.TOC:
+					case CHANNELS.TOC:
 						// Find out which command
 						switch (ackPack.data[0]) {
-							case LOGGING_COMMANDS.TOC.GET_ITEM:
+							case COMMANDS.TOC.GET_ITEM:
 								this.tocFetcher.handleTOCItem(ackPack.data.slice(1));
 								break;
-							case LOGGING_COMMANDS.TOC.GET_INFO:
+							case COMMANDS.TOC.GET_INFO:
 								this.tocFetcher.handleTOCInfo(ackPack.data.slice(1));
 								break;
 						}
 						break;
-					case LOGGING_CHANNELS.LOG_CTRL:
+					case CHANNELS.LOG.CTRL:
 						this.handleBlock(ackPack.data);
 						break;
-					case LOGGING_CHANNELS.LOG_DATA:
+					case CHANNELS.LOG.DATA:
 						this.handleLogData(ackPack.data);
 						break;
 					default:
@@ -117,10 +108,10 @@ export class Logging extends EventEmitter {
 
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+		packet.channel = CHANNELS.LOG.CTRL;
 
 		packet
-			.write('int8', LOGGING_COMMANDS.LOG_CTRL.CREATE_BLOCK)
+			.write('int8', COMMANDS.LOG_CTRL.CREATE_BLOCK)
 			.write('int8', block.id);
 
 		for (const variable of block.variables) {
@@ -147,10 +138,10 @@ export class Logging extends EventEmitter {
 
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+		packet.channel = CHANNELS.LOG.CTRL;
 
 		packet
-			.write('int8', LOGGING_COMMANDS.LOG_CTRL.APPEND_BLOCK)
+			.write('int8', COMMANDS.LOG_CTRL.APPEND_BLOCK)
 			.write('int8', block.id);
 
 		for (const variable of variables) {
@@ -186,10 +177,10 @@ export class Logging extends EventEmitter {
 		// If we deleted something, delete on Crazyflie too
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+		packet.channel = CHANNELS.LOG.CTRL;
 
 		packet
-			.write('int8', LOGGING_COMMANDS.LOG_CTRL.DELETE_BLOCK)
+			.write('int8', COMMANDS.LOG_CTRL.DELETE_BLOCK)
 			.write('int8', blockId);
 
 		return this.crazyflie.radio.sendPacket(packet)
@@ -212,10 +203,10 @@ export class Logging extends EventEmitter {
 
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+		packet.channel = CHANNELS.LOG.CTRL;
 
 		packet
-			.write('int8', LOGGING_COMMANDS.LOG_CTRL.START_BLOCK)
+			.write('int8', COMMANDS.LOG_CTRL.START_BLOCK)
 			.write('int8', blockId)
 			.write('int8', interval);
 
@@ -235,10 +226,10 @@ export class Logging extends EventEmitter {
 
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+		packet.channel = CHANNELS.LOG.CTRL;
 
 		packet
-			.write('int8', LOGGING_COMMANDS.LOG_CTRL.DELETE_BLOCK)
+			.write('int8', COMMANDS.LOG_CTRL.DELETE_BLOCK)
 			.write('int8', blockId);
 
 		return this.crazyflie.radio.sendPacket(packet)
@@ -255,9 +246,9 @@ export class Logging extends EventEmitter {
 
 		const packet = new Packet();
 		packet.port = PORTS.LOGGING;
-		packet.channel = LOGGING_CHANNELS.LOG_CTRL;
+		packet.channel = CHANNELS.LOG.CTRL;
 
-		packet.write('int8', LOGGING_COMMANDS.LOG_CTRL.RESET_LOG);
+		packet.write('int8', COMMANDS.LOG_CTRL.RESET_LOG);
 
 		return this.crazyflie.radio.sendPacket(packet)
 			.then(waitUntilEvent<void>(this, 'reset log'));
@@ -283,22 +274,22 @@ export class Logging extends EventEmitter {
 		}
 
 		switch (command) {
-			case LOGGING_COMMANDS.LOG_CTRL.CREATE_BLOCK:
+			case COMMANDS.LOG_CTRL.CREATE_BLOCK:
 				this.emit('create block', { error, blockId });
 				break;
-			case LOGGING_COMMANDS.LOG_CTRL.APPEND_BLOCK:
+			case COMMANDS.LOG_CTRL.APPEND_BLOCK:
 				this.emit('append block', { error, blockId });
 				break;
-			case LOGGING_COMMANDS.LOG_CTRL.DELETE_BLOCK:
+			case COMMANDS.LOG_CTRL.DELETE_BLOCK:
 				this.emit('delete block', { error, blockId });
 				break;
-			case LOGGING_COMMANDS.LOG_CTRL.START_BLOCK:
+			case COMMANDS.LOG_CTRL.START_BLOCK:
 				this.emit('start block', { error, blockId });
 				break;
-			case LOGGING_COMMANDS.LOG_CTRL.STOP_BLOCK:
+			case COMMANDS.LOG_CTRL.STOP_BLOCK:
 				this.emit('stop block', { error, blockId });
 				break;
-			case LOGGING_COMMANDS.LOG_CTRL.RESET_LOG:
+			case COMMANDS.LOG_CTRL.RESET_LOG:
 				this.emit('reset log', { error });
 				break;
 			default:

@@ -1,5 +1,5 @@
 import { Crazyflie } from '.';
-import { PARAM_CHANNELS } from '../constants';
+import { CHANNELS, COMMANDS } from '../constants';
 import { Ack } from '../packet';
 import { TOC_TYPES, TOCFetcher } from './toc-fetcher';
 
@@ -19,16 +19,24 @@ export class Parameters extends EventEmitter {
 
 		this.crazyflie.radio.on('parameters', (ackPack: Ack) => {
 			try {
-				console.log('Param ack', ackPack);
 				// Route the packet to the correct handler function
 				switch (ackPack.channel) {
-					case PARAM_CHANNELS.TOC:
+					case CHANNELS.TOC:
+						// Find out which command
+						switch (ackPack.data[0]) {
+							case COMMANDS.TOC.GET_ITEM:
+								this.tocFetcher.handleTOCItem(ackPack.data.slice(1));
+								break;
+							case COMMANDS.TOC.GET_INFO:
+								this.tocFetcher.handleTOCInfo(ackPack.data.slice(1));
+								break;
+						}
 						break;
-					case PARAM_CHANNELS.READ:
+					case CHANNELS.PARAM.READ:
 						break;
-					case PARAM_CHANNELS.WRITE:
+					case CHANNELS.PARAM.WRITE:
 						break;
-					case PARAM_CHANNELS.MISC:
+					case CHANNELS.PARAM.MISC:
 						break;
 				}
 			} catch (err) {

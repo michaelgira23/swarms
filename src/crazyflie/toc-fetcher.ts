@@ -1,13 +1,5 @@
 import { Crazyflie } from '.';
-import {
-	BUFFER_TYPES,
-	GET_LOGGING_TYPE,
-	LOGGING_CHANNELS,
-	LOGGING_COMMANDS,
-	PARAM_CHANNELS,
-	PARAM_COMMANDS,
-	PORTS
-} from '../constants';
+import { BUFFER_TYPES, CHANNELS, COMMANDS, GET_LOGGING_TYPE, GET_PARAM_TYPE, PORTS } from '../constants';
 import { Packet } from '../packet';
 import { wait, waitUntilEvent } from '../utils';
 import { TOC, TOCItem } from './toc';
@@ -19,6 +11,7 @@ import * as path from 'path';
 export class TOCFetcher extends EventEmitter {
 
 	fetched = false;
+	port: number;
 	toc = new TOC();
 
 	get cachePath() {
@@ -49,34 +42,31 @@ export class TOCFetcher extends EventEmitter {
 
 	/**
 	 * Fetches TOC from the Crazyflie. Specify port because both parameters and logging use the same system
-	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
 	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:log#table_of_content_access)
+	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
 	 */
 
 	constructor(private crazyflie: Crazyflie, public type: TOC_TYPES) {
 		super();
 
-		if (!(type in TOC_TYPES)) {
-			throw new Error(`Invalid TOC type "${type}"!`);
+		switch (this.type) {
+			case TOC_TYPES.PARAM:
+				this.port = PORTS.PARAMETERS;
+				break;
+			case TOC_TYPES.LOG:
+				this.port = PORTS.LOGGING;
+				break;
+			default:
+				throw new Error(`Invalid TOC type "${type}"!`);
 		}
 	}
 
-	start() {
+	async start() {
 		const packet = new Packet();
+		packet.port = this.port;
+		packet.channel = CHANNELS.TOC;
 
-		switch (this.type) {
-			case TOC_TYPES.PARAM:
-				packet.port = PORTS.PARAMETERS;
-				packet.channel = PARAM_CHANNELS.TOC;
-				packet.write('int8', PARAM_COMMANDS.TOC.GET_INFO);
-				break;
-
-			case TOC_TYPES.LOG:
-				packet.port = PORTS.LOGGING;
-				packet.channel = LOGGING_CHANNELS.TOC;
-				packet.write('int8', LOGGING_COMMANDS.TOC.GET_INFO);
-				break;
-		}
+		packet.write('int8', COMMANDS.TOC.GET_INFO);
 
 		return this.crazyflie.radio.sendPacket(packet)
 			.then(waitUntilEvent<TOC>(this, 'toc ready'));
@@ -100,41 +90,15 @@ export class TOCFetcher extends EventEmitter {
 			this.fetched = true;
 			this.emit('toc ready', this.toc);
 		} else {
-
-			switch (this.type) {
-				case TOC_TYPES.PARAM:
-					// Reset param TOC pointer
-					await this.resetTOCPointer();
-					break;
-
-				case TOC_TYPES.LOG:
-					// Bombard the Crazyflie with TOC item requests until it fully complies
-					while (this.toc.items.length < this.length) {
-						this.fetchRemainingTOCItems();
-						await wait(3000);
-					}
-					break;
+			// Bombard the Crazyflie with TOC item requests until it fully complies
+			while (this.toc.items.length < this.length) {
+				this.fetchRemainingTOCItems();
+				// Time was scientifically optimized for maximum capacity by spamming packets at different intervals.
+				// Most of the TOC item requests, if they respond, respond within 3 seconds.
+				// That's when we give the TOC the boot (multiple times) until ALL of the items respond.
+				await wait(3000);
 			}
 		}
-	}
-
-	/**
-	 * Reset TOC pointer. For parameter TOC only!
-	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
-	 */
-
-	private resetTOCPointer() {
-		if (this.type !== TOC_TYPES.PARAM) {
-			throw new Error(`Resetting TOC pointer is only for parameter TOC's! Not for type "${this.type}"!`);
-		}
-
-		const packet = new Packet();
-		packet.port = PORTS.PARAMETERS;
-		packet.channel = PARAM_CHANNELS.TOC;
-
-		packet.write('int8', PARAM_COMMANDS.TOC.RESET_POINTER);
-
-		return this.crazyflie.radio.sendPacket(packet);
 	}
 
 	/**
@@ -164,22 +128,12 @@ export class TOCFetcher extends EventEmitter {
 		}
 
 		const packet = new Packet();
+		packet.port = this.port;
+		packet.channel = CHANNELS.TOC;
 
-		switch (this.type) {
-			case TOC_TYPES.PARAM:
-				packet.port = PORTS.PARAMETERS;
-				packet.channel = PARAM_CHANNELS.TOC;
-				packet.write('int8', PARAM_COMMANDS.TOC.NEXT_ELEMENT);
-				break;
-
-			case TOC_TYPES.LOG:
-				packet.port = PORTS.LOGGING;
-				packet.channel = LOGGING_CHANNELS.TOC;
-				packet.write('int8', LOGGING_COMMANDS.TOC.GET_ITEM);
-				break;
-		}
-
-		packet.write('int8', id);
+		packet
+			.write('int8', COMMANDS.TOC.GET_ITEM)
+			.write('int8', id);
 
 		return this.crazyflie.radio.sendPacket(packet);
 	}
@@ -193,7 +147,17 @@ export class TOCFetcher extends EventEmitter {
 		const types = BUFFER_TYPES(data);
 
 		const id = types.int8.read(0);
-		const type = GET_LOGGING_TYPE(types.int8.read(1));
+
+		let type: string;
+		switch (this.type) {
+			case TOC_TYPES.PARAM:
+				type = GET_PARAM_TYPE(types.int8.read(1));
+				break;
+			case TOC_TYPES.LOG:
+				type = GET_LOGGING_TYPE(types.int8.read(1));
+				break;
+		}
+
 		const [ group, name ] = data.slice(2).toString().split('\u0000');
 
 		const item: TOCItem = {
@@ -209,7 +173,7 @@ export class TOCFetcher extends EventEmitter {
 			this.emit('toc item', item);
 
 			// If that was the last item, cache TOC and alert the others!
-			if (this.length === this.toc.items.length) {
+			if (this.toc.items.length === this.length) {
 				this.fetched = true;
 				await this.cacheTOC(this.crc, this.toc.items);
 				this.emit('toc ready', this.toc);
@@ -273,9 +237,9 @@ export class TOCFetcher extends EventEmitter {
 
 }
 
-export enum TOC_TYPES {
-	PARAM = 2,
-	LOG = 5
+export const enum TOC_TYPES {
+	PARAM = 'parameters',
+	LOG = 'logging'
 }
 
 export interface TOCCache {
