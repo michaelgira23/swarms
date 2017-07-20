@@ -20,7 +20,6 @@ export class Parameters extends EventEmitter {
 		super();
 
 		this.crazyflie.radio.on('parameters', (ackPack: Ack) => {
-			console.log('ack param', ackPack);
 			try {
 				// Route the packet to the correct handler function
 				switch (ackPack.channel) {
@@ -58,8 +57,6 @@ export class Parameters extends EventEmitter {
 
 		packet.write('int8', item.id);
 
-		console.log('send da packet', packet);
-
 		return this.crazyflie.radio.sendPacket(packet)
 			.then(waitUntilEvent<{ item: TOCItem, value: number }>(this, 'get'))
 			.then(data => data.value);
@@ -94,8 +91,6 @@ export class Parameters extends EventEmitter {
 		// Find out type of param so we can read appropriately
 		const tocItem = this.tocFetcher.toc.getItemById(id);
 		const paramValue = types[tocItem.type].read(1);
-
-		console.log('Handle param');
 
 		this.emit(mode, {
 			item: tocItem,
