@@ -1,5 +1,5 @@
 import { Crazyflie } from '.';
-import { BUFFER_TYPES, CHANNELS, COMMANDS, GET_LOGGING_TYPE, GET_PARAM_TYPE, PORTS } from '../constants';
+import { BUFFER_TYPES, CHANNELS, COMMANDS, GET_LOGGING_TYPE, GET_PARAM_TYPE, PORTS, Type } from '../constants';
 import { Packet } from '../packet';
 import { wait, waitUntilEvent } from '../utils';
 import { TOC, TOCItem } from './toc';
@@ -147,14 +147,18 @@ export class TOCFetcher extends EventEmitter {
 		const types = BUFFER_TYPES(data);
 
 		const id = types.int8.read(0);
+		const metadata = types.int8.read(1);
 
-		let type: string;
+		let type: Type;
+		let readOnly = false;
 		switch (this.type) {
 			case TOC_TYPES.PARAM:
-				type = GET_PARAM_TYPE(types.int8.read(1));
+				type = GET_PARAM_TYPE(metadata & 0x0F);
+				// If param type begins with 0x4_, then it's read only.
+				readOnly = ((metadata & 0xF0) === 0x40);
 				break;
 			case TOC_TYPES.LOG:
-				type = GET_LOGGING_TYPE(types.int8.read(1));
+				type = GET_LOGGING_TYPE(metadata);
 				break;
 		}
 
@@ -166,6 +170,10 @@ export class TOCFetcher extends EventEmitter {
 			group,
 			name
 		};
+
+		if (readOnly) {
+			item.readOnly = true;
+		}
 
 		// Add TOC item if it isn't a duplicate
 		if (this.toc.addItem(item)) {

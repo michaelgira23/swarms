@@ -1,3 +1,5 @@
+import { Type } from '../constants';
+
 export class TOC {
 
 	/**
@@ -55,7 +57,8 @@ export class TOC {
 
 export interface TOCItem {
 	id: number;
-	type: string;
+	type: Type;
 	group: string;
 	name: string;
+	readOnly?: boolean; // Only for param TOC
 }

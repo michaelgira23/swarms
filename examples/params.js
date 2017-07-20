@@ -50,6 +50,38 @@ async function main() {
 		console.log(`TOC is of length ${drone.parameters.tocFetcher.length} and has a checksum of ${drone.parameters.tocFetcher.crc}`);
 		console.log('******************************');
 
+		let time = new Date();
+		const posHold = await drone.parameters.get(toc.getItem('flightmode', 'poshold'));
+
+		console.log('******************************');
+		console.log(`Got 'position hold' param in ${(Date.now() - time) / 1000}s with value ${posHold}`);
+		console.log('******************************');
+
+		time = new Date();
+		const newVal = await drone.parameters.set(toc.getItem('flightmode', 'poshold'), 1);
+
+		console.log('******************************');
+		console.log(`Set 'position hold' param in ${(Date.now() - time) / 1000}s with new value ${newVal}`);
+		console.log('******************************');
+
+		// console.log('******************************');
+		// console.log('Getting firmware revision');
+		// console.log('******************************');
+		//
+		// const zeroTime = new Date();
+		// const firmwareRevision0 = await drone.parameters.get(toc.getItem('firmware', 'revision0'));
+		//
+		// console.log('******************************');
+		// console.log(`Got revision 0 in ${(Date.now() - zeroTime) / 1000}s with value ${firmwareRevision0}`);
+		// console.log('******************************');
+		//
+		// const oneTime = new Date();
+		// const firmwareRevision1 = await drone.parameters.get(toc.getItem('firmware', 'revision1'));
+		//
+		// console.log('******************************');
+		// console.log(`Got revision 1 in ${(Date.now() - oneTime) / 1000}s with value ${firmwareRevision1}`);
+		// console.log('******************************');
+
 	} catch (err) {
 		console.log('Uh oh!', err);
 		await radio.close();

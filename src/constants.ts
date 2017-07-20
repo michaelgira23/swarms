@@ -134,7 +134,7 @@ export const PARAM_TYPES: SortaEnum = {
 export function GET_PARAM_TYPE(typeValue: number) {
 	for (const type of Object.keys(PARAM_TYPES)) {
 		if (PARAM_TYPES[type] === typeValue) {
-			return type;
+			return (type as Type);
 		}
 	}
 	return null;
@@ -159,7 +159,7 @@ export const LOGGING_TYPES: SortaEnum = {
 export function GET_LOGGING_TYPE(typeValue: number) {
 	for (const type of Object.keys(LOGGING_TYPES)) {
 		if (LOGGING_TYPES[type] === typeValue) {
-			return type;
+			return (type as Type);
 		}
 	}
 	return null;
@@ -231,6 +231,9 @@ export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
 			read: buffer.readInt32LE.bind(buffer),
 			write: buffer.writeInt32LE.bind(buffer)
 		},
+		// int64: {
+		// 	/** @todo Implement 64-bit unsigned integer read and write functions */
+		// },
 		uInt8: {
 			size: 1,
 			read: buffer.readUInt8.bind(buffer),
@@ -246,13 +249,26 @@ export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
 			read: buffer.readUInt32LE.bind(buffer),
 			write: buffer.writeUInt32LE.bind(buffer)
 		}
+		// uInt64: {
+		// 	/** @todo Implement 64-bit unsigned integer read and write functions */
+		// },
 		// fp16: {
 		// 	/** @todo Implement fp16 read and write functions */
 		// }
 	};
 }
 
-export type Type = 'double' | 'float' | 'int8' | 'int16' | 'int32' | 'uInt8' | 'uInt16' | 'uInt32' | 'fp16';
+export type Type = 'double'
+	| 'float'
+	| 'int8'
+	| 'int16'
+	| 'int32'
+	| 'int64'
+	| 'uInt8'
+	| 'uInt16'
+	| 'uInt32'
+	| 'uInt64'
+	| 'fp16';
 
 export interface TypeData {
 	size: number; // Size in bytes
