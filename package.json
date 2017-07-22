@@ -41,7 +41,6 @@
   "homepage": "https://github.com/michaelgira23/swarms#readme",
   "dependencies": {
     "fs-extra": "^3.0.1",
-    "ieee754": "^1.1.8",
     "lodash": "^4.17.4",
     "usb": "^1.2.0"
   },
