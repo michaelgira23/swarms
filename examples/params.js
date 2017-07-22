@@ -28,20 +28,19 @@ async function main() {
 
 		console.log('******************************');
 		console.log('Retrieving Crazyflie Table of Contents');
-		console.log('This could take up to ~30 seconds...');
 		console.log('******************************');
 
 		const parametersStart = new Date();
 
-		drone.parameters.tocFetcher.on('toc item', item => {
-			const time = (Date.now() - parametersStart) / 1000;
-			const nthItem = drone.parameters.tocFetcher.toc.items.length;
-			const percentage = swarms.utils.round((nthItem / drone.parameters.tocFetcher.length) * 100, 2);
-			console.log('******************************');
-			console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
-			console.log(`TOC item ${nthItem} / ${drone.parameters.tocFetcher.length} (${percentage}%)`);
-			console.log('******************************');
-		});
+		// drone.parameters.tocFetcher.on('toc item', item => {
+		// 	const time = (Date.now() - parametersStart) / 1000;
+		// 	const nthItem = drone.parameters.tocFetcher.toc.items.length;
+		// 	const percentage = swarms.utils.round((nthItem / drone.parameters.tocFetcher.length) * 100, 2);
+		// 	console.log('******************************');
+		// 	console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
+		// 	console.log(`TOC item ${nthItem} / ${drone.parameters.tocFetcher.length} (${percentage}%)`);
+		// 	console.log('******************************');
+		// });
 
 		const toc = await drone.parameters.tocFetcher.start();
 
@@ -63,24 +62,6 @@ async function main() {
 		console.log('******************************');
 		console.log(`Set 'position hold' param in ${(Date.now() - time) / 1000}s with new value ${newVal}`);
 		console.log('******************************');
-
-		// console.log('******************************');
-		// console.log('Getting firmware revision');
-		// console.log('******************************');
-		//
-		// const zeroTime = new Date();
-		// const firmwareRevision0 = await drone.parameters.get(toc.getItem('firmware', 'revision0'));
-		//
-		// console.log('******************************');
-		// console.log(`Got revision 0 in ${(Date.now() - zeroTime) / 1000}s with value ${firmwareRevision0}`);
-		// console.log('******************************');
-		//
-		// const oneTime = new Date();
-		// const firmwareRevision1 = await drone.parameters.get(toc.getItem('firmware', 'revision1'));
-		//
-		// console.log('******************************');
-		// console.log(`Got revision 1 in ${(Date.now() - oneTime) / 1000}s with value ${firmwareRevision1}`);
-		// console.log('******************************');
 
 	} catch (err) {
 		console.log('Uh oh!', err);

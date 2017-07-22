@@ -51,10 +51,10 @@ export class Crazyradio extends EventEmitter {
 	private fallbackPingTimeout: NodeJS.Timer;
 	// How many milliseconds the interval should be. A ping will be sent no matter what on this interval.
 	// (for fallbackPingInterval)
-	private pingInterval = 1000;
+	private pingInterval = 5;
 	// How many milliseconds after receiving a non-empty packet should we wait until sending another ping
 	// (for fallbackPingTimeout)
-	private packetResponseTimeout = 100;
+	private packetResponseTimeout = -1;
 
 	/**
 	 * Class for controlling the Crazyradio
@@ -252,6 +252,8 @@ export class Crazyradio extends EventEmitter {
 
 	private onInStreamData(data: Buffer) {
 		const ackPack = new Ack(data);
+
+		// console.log('Received data', ackPack);
 
 		this.emit('all', ackPack);
 

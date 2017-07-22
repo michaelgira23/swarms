@@ -90,13 +90,12 @@ export class TOCFetcher extends EventEmitter {
 			this.fetched = true;
 			this.emit('toc ready', this.toc);
 		} else {
-			// Bombard the Crazyflie with TOC item requests until it fully complies
+			// Bombard the Crazyflie with TOC item requests until all TOC items are received.
+			// While this is contrary to what most other libraries do, it saves a bit of time instead of
+			// sending a request for TOC item, waiting for response, then send request for next TOC item.
 			while (this.toc.items.length < this.length) {
 				this.fetchRemainingTOCItems();
-				// Time was scientifically optimized for maximum capacity by spamming packets at different intervals.
-				// Most of the TOC item requests, if they respond, respond within 3 seconds.
-				// That's when we give the TOC the boot (multiple times) until ALL of the items respond.
-				await wait(3000);
+				await wait(100);
 			}
 		}
 	}

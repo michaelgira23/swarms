@@ -28,18 +28,17 @@ async function main() {
 
 		console.log('******************************');
 		console.log('Retrieving Crazyflie Table of Contents');
-		console.log('This could take up to ~30 seconds...');
 		console.log('******************************');
 
-		drone.logging.tocFetcher.on('toc item', item => {
-			const time = (Date.now() - telemetryStart) / 1000;
-			const nthItem = drone.logging.tocFetcher.toc.items.length;
-			const percentage = swarms.utils.round((nthItem / drone.logging.tocFetcher.length) * 100, 2);
-			console.log('******************************');
-			console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
-			console.log(`TOC item ${nthItem} / ${drone.logging.tocFetcher.length} (${percentage}%)`);
-			console.log('******************************');
-		});
+		// drone.logging.tocFetcher.on('toc item', item => {
+		// 	const time = (Date.now() - telemetryStart) / 1000;
+		// 	const nthItem = drone.logging.tocFetcher.toc.items.length;
+		// 	const percentage = swarms.utils.round((nthItem / drone.logging.tocFetcher.length) * 100, 2);
+		// 	console.log('******************************');
+		// 	console.log(`Got TOC Item ID ${item.id}! After ${time}s`);
+		// 	console.log(`TOC item ${nthItem} / ${drone.logging.tocFetcher.length} (${percentage}%)`);
+		// 	console.log('******************************');
+		// });
 
 		const telemetryStart = new Date();
 		const toc = await drone.logging.tocFetcher.start();
@@ -47,10 +46,7 @@ async function main() {
 		console.log('******************************');
 		console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
 		console.log(`TOC is of length ${drone.logging.tocFetcher.length} and has a checksum of ${drone.logging.tocFetcher.crc}`);
-		console.log('******************************');
-
-		console.log('******************************');
-		console.log('Starting gyro data. This could take some time as well...');
+		console.log('Initializing gyroscope data now.');
 		console.log('******************************');
 
 		// Invoke getting of gyroscope data
@@ -63,6 +59,15 @@ async function main() {
 		console.log('******************************');
 		console.log('Telemetry initialization finished!');
 		console.log('******************************');
+
+		/**
+		 * You can use any of the 3 types of events to get the logging data.
+		 * You can use:
+		 *
+		 * 1) Global `*` event - This will emit all data received in the format `{ group: { name: value } }`
+		 * 2) Group event - This will emit data received for the group in the format `{ name: value }`
+		 * 3) Full name event (`group.name`) - This will emit the value received.
+		 */
 
 		drone.logging.data.on('*', data => {
 			console.log('Logging data:', data);
