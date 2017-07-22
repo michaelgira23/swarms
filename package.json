@@ -1,15 +1,16 @@
 {
   "name": "swarms",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The ultimate node.js library for controlling Bitcraze Crazyflie 2.0 drones",
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "npm run lint",
     "lint": "tslint --type-check --project tsconfig.json \"src/**/*.ts\"",
+    "prepublish": "rimraf ./dist && npm run ts",
+    "test": "npm run lint",
     "ts": "tsc",
     "ts:watch": "tsc -w"
   },
@@ -22,9 +23,14 @@
     "crazyflie 2.0",
     "bitcraze",
     "crazyradio",
+    "crazyradio pa",
+    "drone",
     "drones",
     "quadcopter",
+    "quadcopters",
     "nanocopter",
+    "nanocopters",
+    "swarm",
     "swarms",
     "world",
     "domination"
@@ -50,6 +56,7 @@
     "@types/node": "^7.0.31",
     "@types/usb": "^1.1.3",
     "dtslint": "^0.1.2",
+    "rimraf": "^2.6.1",
     "tslint": "^5.4.3",
     "typescript": "^2.3.4"
   }

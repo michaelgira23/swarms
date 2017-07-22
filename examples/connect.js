@@ -25,6 +25,7 @@ async function main() {
 		setTimeout(async () => {
 			console.log('Disconnect!');
 			await radio.disconnect();
+			await radio.close();
 		}, 3000);
 
 	} catch (err) {

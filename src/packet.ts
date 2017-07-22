@@ -12,6 +12,20 @@ export class Packet {
 	data: Buffer = Buffer.alloc(MAX_PAYLOAD_SIZE);
 
 	/**
+	 * Generate header with current port and channel
+	 * Header format located here:
+	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#packet_structure)
+	 */
+
+	get header() {
+		// First 4 bits are port, next 2 bits are reserved for link layer, last 2 bits are for channel
+		let header = (this.port & 0x0f) << 4 | (this.channel & 0x03);
+		// Set link layer bits to 0 by applying this mask
+		header &= ~(0x03 << 2);
+		return header;
+	}
+
+	/**
 	 * Represents a packet to send to the Crazyflie
 	 */
 
@@ -47,57 +61,14 @@ export class Packet {
 	}
 
 	/**
-	 * Generate header with current port and channel
-	 * Header format located here:
+	 * Export packet into a complete buffer to send to the Crazyflie
 	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#packet_structure)
 	 */
 
-	getHeader() {
-		// First 4 bits are port, next 2 bits are reserved for link layer, last 2 bits are for channel
-		let header = (this.port & 0x0f) << 4 | (this.channel & 0x03);
-		// Set link layer bits to 0 by applying this mask
-		header &= ~(0x03 << 2);
-		return header;
-	}
-
-	/**
-	 * Export packet into a complete buffer to send to the Crazyflie
-	 * Optionally specify serial port for alternate packet structure:
-	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#serial_port)
-	 */
-
-	export(serialPort = false) {
-		const header = this.getHeader();
-
-		// Slice data buffer to the actual payload we used
-		const payload = this.data.slice(0, this.length);
-
-		if (!serialPort) {
-			return Buffer.concat([
-				Buffer.from(header.toString(16), 'hex'),
-				payload
-			]);
-		}
-
-		// Put stuff together that we want to include in checksum
-		const packet = Buffer.concat([
-			Buffer.from(header.toString(16), 'hex'),
-			Buffer.from(toHex(payload.length, true), 'hex'),
-			payload
-		]);
-
-		// Count up packet to get checksum
-		let cksum = 0;
-		for (const byte of packet) {
-			cksum += byte;
-		}
-		cksum %= 256;
-
-		// Include final things (start token and checksum)
+	export() {
 		return Buffer.concat([
-			Buffer.from('aaaa', 'hex'),
-			packet,
-			Buffer.from(cksum.toString(16), 'hex')
+			Buffer.from(this.header.toString(16), 'hex'),
+			this.data.slice(0, this.length)
 		]);
 	}
 
@@ -105,8 +76,8 @@ export class Packet {
 	 * Return an array of hex codes for debugging
 	 */
 
-	exportHexCodes(serialPort?: boolean) {
-		const buffer = this.export(serialPort);
+	exportHexCodes() {
+		const buffer = this.export();
 		const hexes = [];
 		for (const byte of buffer) {
 			hexes.push(toHex(byte, true, true));
