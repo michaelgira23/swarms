@@ -2,16 +2,22 @@
  * Connect to a Crazyflie
  */
 
-const swarms = require('../dist/index');
+const { Crazyradio } = require('../dist/index');
 
 // Because you can only use `await` within an async function...
 main();
 async function main() {
-	const radio = new swarms.Crazyradio();
+
+	const radio = new Crazyradio();
+
 	try {
+
 		await radio.init();
 
 		radio.on('console line', console.log);
+		radio.on('error', err => {
+			console.log('Radio error!', err);
+		});
 
 		const drones = await radio.findDrones();
 		console.log(`Nearby drones: ${drones}`);
@@ -24,7 +30,6 @@ async function main() {
 
 		setTimeout(async () => {
 			console.log('Disconnect!');
-			await radio.disconnect();
 			await radio.close();
 		}, 3000);
 

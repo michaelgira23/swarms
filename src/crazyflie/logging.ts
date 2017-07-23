@@ -1,12 +1,11 @@
 import { Crazyflie } from '.';
 import { BLOCK_ERRORS, BUFFER_TYPES, CHANNELS, COMMANDS, LOGGING_TYPES, PORTS } from '../constants';
 import { Ack, Packet } from '../packet';
-import { wait, waitUntilEvent } from '../utils';
+import { waitUntilEvent } from '../utils';
 import { TOCItem } from './toc';
 import { TOC_TYPES, TOCFetcher } from './toc-fetcher';
 
 import { EventEmitter } from 'events';
-import * as fs from 'fs-extra';
 
 export class Logging extends EventEmitter {
 
@@ -17,7 +16,7 @@ export class Logging extends EventEmitter {
 	// (A block is a set of variables that the Crazyflie sends back at certain intervals)
 	blocks: Block[] = [];
 	// Counter for assigning block ids
-	nextBlockId = 0;
+	private nextBlockId = 0;
 
 	// Emit all logging variables from the `data` property
 	data = new EventEmitter();
@@ -308,7 +307,7 @@ export class Logging extends EventEmitter {
 
 		const blockId = types.int8.read(0);
 		// Timestamp is different because it's a 3-byte integer
-		const timestamp = data.readIntLE(1, 3);
+		// const timestamp = data.readIntLE(1, 3);
 
 		// Get block so we know what variables are and their data types
 		const block = this.getBlock(blockId);

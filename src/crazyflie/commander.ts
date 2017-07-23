@@ -4,12 +4,15 @@ import { Packet } from '../packet';
 
 export class Commander {
 
-	currentSetpoint: Setpoint = {
+	// Set values initially at 0 or else it won't work
+	private currentSetpoint: Setpoint = {
 		roll: 0,
 		yaw: 0,
 		pitch: 0,
 		thrust: 0
 	};
+
+	private setpointInterval: NodeJS.Timer;
 
 	/**
 	 * Class for dealing with the 'commander' port
@@ -17,7 +20,31 @@ export class Commander {
 	 */
 
 	constructor(private crazyflie: Crazyflie) {
+		// Stop setpoint interval upon disconnect
+		this.crazyflie.radio.on('disconnect', () => {
+			this.clearSetpointInterval();
+		});
+	}
 
+	/**
+	 * We need to update the Crazyflie's position every so often otherwise it will stop after a few seconds
+	 */
+
+	startSetpointInterval() {
+		this.clearSetpointInterval();
+		this.setpointInterval = setInterval(() => {
+			this.setpoint();
+		}, 100);
+	}
+
+	/**
+	 * Clear the setpoint interval
+	 */
+
+	clearSetpointInterval() {
+		if (this.setpointInterval) {
+			clearInterval(this.setpointInterval);
+		}
 	}
 
 	/**

@@ -17,7 +17,6 @@ import { toHex } from '../utils';
 import { InStream, OutStream } from './usbstreams';
 
 import { EventEmitter } from 'events';
-import * as _ from 'lodash';
 import * as usb from 'usb';
 
 export class Crazyradio extends EventEmitter {
@@ -134,6 +133,7 @@ export class Crazyradio extends EventEmitter {
 	 */
 
 	close() {
+		this.disconnect();
 		return new Promise((resolve, reject) => {
 			if (!this.interface) {
 				resolve();
@@ -183,6 +183,8 @@ export class Crazyradio extends EventEmitter {
 	 */
 
 	disconnect() {
+		// Let the connected drone(s) do any other disconnect stuff
+		this.emit('disconnect');
 		// Stop pinging the drone
 		clearInterval(this.fallbackPingInterval);
 		clearTimeout(this.fallbackPingTimeout);
@@ -315,7 +317,6 @@ export class Crazyradio extends EventEmitter {
 	}
 
 	private onInStreamError(err: string) {
-		console.log('InStream Crazyradio Error:', err);
 		this.emit('error', err);
 	}
 

@@ -28,6 +28,9 @@ export class Crazyflie extends EventEmitter {
 		super();
 
 		// Forward all errors to the global Crazyflie 'error' event
+		this.parameters.on('error', (err: any) => {
+			this.emit('error', err);
+		});
 		this.logging.on('error', (err: any) => {
 			this.emit('error', err);
 		});
@@ -38,13 +41,9 @@ export class Crazyflie extends EventEmitter {
 			return Promise.reject('Crazyflie already initialized!');
 		}
 
-		// Set values initially at 0 or else it won't work
-		await this.commander.setpoint({
-			roll: 0,
-			pitch: 0,
-			yaw: 0,
-			thrust: 0
-		});
+		// Start interval to make sure Crazyflie maintains it's targetted roll, yaw, pitch, and thrust.
+		// It dies out after a few seconds otherwise.
+		this.commander.startSetpointInterval();
 
 		this.initialized = true;
 	}

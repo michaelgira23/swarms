@@ -1,8 +1,6 @@
 import { BUFFER_TYPES, MAX_PAYLOAD_SIZE, Type } from './constants';
 import { toHex } from './utils';
 
-import * as _ from 'lodash';
-
 export class Packet {
 
 	port = 0;

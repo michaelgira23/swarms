@@ -2,49 +2,123 @@
 
 The ultimate node.js client for controlling Bitcraze Crazyflie 2.0 drones
 
-Warning: This projects is currently unstable and going under heavy active development. Check back later as the project matures!
+Warning: This projects is going under heavy active development!
 
-# Motive
+## Motive
 
 There were too many outdated and undocumented node.js libraries out there for programming Crazyflies. This package's goal is to fix that.
 
-# Installation
+## Getting Started
 
-## Crazyflie
+### Prerequisites
+
+#### Crazyflie
 
 This package assumes you have the latest version of the Crazyflie firmware. [You can find instructions on the Bitcraze website on how to update your firmware.](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw)
 
-## Windows
+#### `libusb` Driver
 
-### `libusb` Driver
+This package's main dependency is `node-usb`. [Refer to its installation directions](https://github.com/tessel/node-usb#installation) for any help installing it.
 
-First, you must install the `libusb` driver onto the Crazyradio. [Look on the Bitcraze wiki for instructions on how to install the correct driver.](https://wiki.bitcraze.io/doc:crazyradio:index#drivers)
+##### Windows
 
-### Installing `node-usb`
+[Look on the Bitcraze wiki for instructions on how to install the correct driver.](https://wiki.bitcraze.io/doc:crazyradio:index#drivers)
 
-On Windows, you may encounter a problem installing the `node-usb` package. This can be solved by following [the procedure here.](https://github.com/libusb/libusb/issues/144#issuecomment-269832528) Essentially, navigate to `C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\time.h` and, using an editor running as administrator, add double slashes (`//`) behind each line of this code segment:
-
-```c++
-	struct timespec
-	{
-		time_t tv_sec;  // Seconds - >= 0
-		long   tv_nsec; // Nanoseconds - [0, 999999999]
-	};
-```
-
-Install usb.js normally using `npm install` then remove the slashes again to revert this temporary fix.
-
-## Linux
+##### Linux
 
 [Look at the `node-usb`'s README for directions to install the package.](https://github.com/tessel/node-usb#installation)
 
-# Development
+### Installation
 
-## Compiling
+```
+$ npm install swarms
+```
 
-This project uses TypeScript. To run locally, download all dev dependencies and run `npm run ts` to compile. During development, run `npm run ts:watch` to compile the TypeScript automagically when it detects any changes of the source files.
+### Example Usage
 
-# Acknowledgments
+The following script simply moves the drone's propellers. [More examples are located in the `/examples` directory.](https://github.com/michaelgira23/swarms/tree/master/examples)
+
+```javascript
+const { Crazyradio } = require('swarms');
+
+// Because you can only use `await` within an async function...
+main();
+async function main() {
+
+	const radio = new Crazyradio();
+
+	try {
+
+		await radio.init();
+		radio.on('error', err => {
+			console.log('Radio error!', err);
+		});
+
+		const drones = await radio.findDrones();
+		console.log('Nearby drones: ' + drones);
+
+		if (drones.length < 1) {
+			throw 'Could not find any drones!';
+		}
+
+		const drone = await radio.connect(drones[0]);
+		drone.on('error', err => {
+			console.log('Drone error!', err);
+		});
+
+		await drone.commander.setpoint({
+			roll  : 0,
+			yaw   : 0,
+			pitch : 0,
+			thrust: 32500
+		});
+
+	} catch (err) {
+		console.log('Uh oh!', err);
+		await radio.close();
+	}
+}
+```
+
+### Troubleshooting
+
+#### Windows
+
+You may encounter an issue installing this package on Windows. [Follow procedure detailed here.](https://github.com/libusb/libusb/issues/144#issuecomment-269832528)
+
+## Contributing
+
+Encounter a bug? Have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new)
+
+PR's are also welcome! Just make sure you don't have any linting errors. You can check for linting errors by running:
+
+```
+$ npm run lint
+```
+
+## Development
+
+This project uses TypeScript. To compile from source, run:
+
+```
+$ npm run ts
+```
+
+While modifying the source files, it may be useful to automatically compile. You can do that with the following:
+
+```
+$ npm run ts:watch
+```
+
+## Versioning
+
+This project uses the [SemVer](http://semver.org/) notation for versioning.
+
+## License
+
+This project is under the MIT License.
+
+## Acknowledgments
 
 Special thanks to the following people, whose libraries were used as a reference:
 - [Bitcraze team's `crazyflie-lib-python` library](https://github.com/bitcraze/crazyflie-lib-python)
