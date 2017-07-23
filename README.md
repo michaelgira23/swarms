@@ -2,6 +2,10 @@
 
 The ultimate node.js client for controlling Bitcraze Crazyflie 2.0 drones
 
+[![Dependency Status](https://img.shields.io/david/michaelgira23/swarms.svg)]()
+[![Dev Dependency Status](https://img.shields.io/david/dev/michaelgira23/swarms.svg)]()
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/michaelgira23/swarms/master/LICENSE)
+
 Warning: This projects is going under heavy active development!
 
 ## Motive
@@ -14,57 +18,49 @@ There were too many outdated and undocumented node.js libraries out there for pr
 
 #### Crazyflie
 
-This package assumes you have the latest version of the Crazyflie firmware. [You can find instructions on the Bitcraze website on how to update your firmware.](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw)
+This package assumes you have the latest version of the Crazyflie firmware. You can find [instructions on the Bitcraze website](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw) on how to update your firmware.
 
-#### `libusb` Driver
+##### Crazyradio Driver on Windows
 
-This package's main dependency is `node-usb`. [Refer to its installation directions](https://github.com/tessel/node-usb#installation) for any help installing it.
-
-##### Windows
-
-[Look on the Bitcraze wiki for instructions on how to install the correct driver.](https://wiki.bitcraze.io/doc:crazyradio:index#drivers)
-
-##### Linux
-
-[Look at the `node-usb`'s README for directions to install the package.](https://github.com/tessel/node-usb#installation)
+If on a Windows machine, look on [the Bitcraze wiki](https://wiki.bitcraze.io/doc:crazyradio:index#drivers) for instructions on how to install the correct driver onto your Crazyradio. You do not need to do this on macOS or Linux!
 
 ### Installation
+
+This package's main dependency is `node-usb`. [Refer to its installation directions](https://github.com/tessel/node-usb#installation) for any help installing it on your operating system.
 
 ```
 $ npm install swarms
 ```
 
-### Example Usage
+Note: On Windows, you may fail to install the `node-usb` package getting errors like:
 
-The following script simply moves the drone's propellers. [More examples are located in the `/examples` directory.](https://github.com/michaelgira23/swarms/tree/master/examples)
+```
+error C2011: 'timespec': 'struct' type redefinition
+```
+
+You can fix this by following the [directions here](https://github.com/libusb/libusb/issues/144#issuecomment-269832528).
+
+### Usage
+
+The following script moves the drone's propellers. More examples are located in the [`/examples`](https://github.com/michaelgira23/swarms/tree/master/examples) directory.
 
 ```javascript
 const { Crazyradio } = require('swarms');
 
+const radio = new Crazyradio();
+
 // Because you can only use `await` within an async function...
 main();
 async function main() {
-
-	const radio = new Crazyradio();
-
 	try {
-
 		await radio.init();
-		radio.on('error', err => {
-			console.log('Radio error!', err);
-		});
-
 		const drones = await radio.findDrones();
-		console.log('Nearby drones: ' + drones);
 
 		if (drones.length < 1) {
 			throw 'Could not find any drones!';
 		}
 
 		const drone = await radio.connect(drones[0]);
-		drone.on('error', err => {
-			console.log('Drone error!', err);
-		});
 
 		await drone.commander.setpoint({
 			roll  : 0,
@@ -80,23 +76,17 @@ async function main() {
 }
 ```
 
-### Troubleshooting
+## Troubleshooting
 
-#### Windows
-
-You may encounter an issue installing this package on Windows. [Follow procedure detailed here.](https://github.com/libusb/libusb/issues/144#issuecomment-269832528)
+Got a problem? Refer to the [troubleshooting page](https://github.com/michaelgira23/swarms/blob/master/docs/troubleshooting.md) in the documentation. If that doesn't help, [create an issue.](https://github.com/michaelgira23/swarms/issues/new)
 
 ## Contributing
 
-Encounter a bug? Have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new)
-
-PR's are also welcome! Just make sure you don't have any linting errors. You can check for linting errors by running:
-
-```
-$ npm run lint
-```
+Encounter a bug? Have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new) PR's are also welcome!
 
 ## Development
+
+### Compiling
 
 This project uses TypeScript. To compile from source, run:
 
@@ -104,19 +94,23 @@ This project uses TypeScript. To compile from source, run:
 $ npm run ts
 ```
 
-While modifying the source files, it may be useful to automatically compile. You can do that with the following:
+During development, it may be useful to automagically compile on any file changes. Do this by running:
 
 ```
 $ npm run ts:watch
 ```
 
-## Versioning
+### Testing
 
-This project uses the [SemVer](http://semver.org/) notation for versioning.
+Before making a pull request, make sure your code passes linting and unit tests by using:
+
+```
+$ npm test
+```
 
 ## License
 
-This project is under the MIT License.
+This project is under the [MIT License](https://github.com/michaelgira23/swarms/blob/master/LICENSE).
 
 ## Acknowledgments
 
