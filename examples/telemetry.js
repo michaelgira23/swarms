@@ -37,7 +37,7 @@ async function main() {
 		console.log('******************************');
 
 		const telemetryStart = new Date();
-		const toc = await drone.logging.tocFetcher.start();
+		const toc = await drone.logging.getTOC();
 
 		console.log('******************************');
 		console.log(`Telemetry ready! After ${(Date.now() - telemetryStart) / 1000}s`);
@@ -50,7 +50,7 @@ async function main() {
 			toc.getItem('gyro', 'x'),
 			toc.getItem('gyro', 'y'),
 			toc.getItem('gyro', 'z')
-		]);
+		], 100);
 
 		console.log('******************************');
 		console.log('Telemetry initialization finished!');

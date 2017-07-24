@@ -57,11 +57,12 @@ export class Commander {
 		const target = Object.assign({}, this.currentSetpoint, setpoint);
 
 		// Set thrust limits
+		// (https://forum.bitcraze.io/viewtopic.php?t=442)
 		if (target.thrust < 0) {
 			target.thrust = 0;
 		}
-		if (target.thrust > 0xFFFF) {
-			target.thrust = 0xFFFF;
+		if (target.thrust > 60000) {
+			target.thrust = 60000;
 		}
 
 		this.currentSetpoint = target;

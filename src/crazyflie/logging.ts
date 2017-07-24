@@ -2,7 +2,7 @@ import { Crazyflie } from '.';
 import { BLOCK_ERRORS, BUFFER_TYPES, CHANNELS, COMMANDS, LOGGING_TYPES, PORTS } from '../constants';
 import { Ack, Packet } from '../packet';
 import { waitUntilEvent } from '../utils';
-import { TOCItem } from './toc';
+import { TOC, TOCItem } from './toc';
 import { TOC_TYPES, TOCFetcher } from './toc-fetcher';
 
 import { EventEmitter } from 'events';
@@ -58,6 +58,15 @@ export class Logging extends EventEmitter {
 				this.emit('error', err);
 			}
 		});
+	}
+
+	/**
+	 * Retrieve logging TOC from the Crazyflie.
+	 * Required before getting any logging data!
+	 */
+
+	getTOC() {
+		return this.tocFetcher.start();
 	}
 
 	/**

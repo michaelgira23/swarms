@@ -16,7 +16,7 @@ There were too many outdated and undocumented node.js libraries out there for pr
 
 ### Prerequisites
 
-#### Crazyflie
+#### Crazyflie Firmware
 
 This package assumes you have the latest version of the Crazyflie firmware. You can find [instructions on the Bitcraze website](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw) on how to update your firmware.
 

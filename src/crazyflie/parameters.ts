@@ -2,7 +2,7 @@ import { Crazyflie } from '.';
 import { BUFFER_TYPES, CHANNELS, COMMANDS, PORTS } from '../constants';
 import { Ack, Packet } from '../packet';
 import { waitUntilEvent } from '../utils';
-import { TOCItem } from './toc';
+import { TOC, TOCItem } from './toc';
 import { TOC_TYPES, TOCFetcher } from './toc-fetcher';
 
 import { EventEmitter } from 'events';
@@ -49,6 +49,19 @@ export class Parameters extends EventEmitter {
 		});
 	}
 
+	/**
+	 * Retrieve logging TOC from the Crazyflie.
+	 * Required before getting any logging data!
+	 */
+
+	getTOC() {
+		return this.tocFetcher.start();
+	}
+
+	/**
+	 * Fetch the value of a parameter from the Crazyflie
+	 */
+
 	get(item: TOCItem) {
 
 		const packet = new Packet();
@@ -61,6 +74,10 @@ export class Parameters extends EventEmitter {
 			.then(waitUntilEvent<{ item: TOCItem, value: number }>(this, 'get'))
 			.then(data => data.value);
 	}
+
+	/**
+	 * Set the value of a parameter on the Crazyflie
+	 */
 
 	set(item: TOCItem, value: number) {
 
@@ -83,6 +100,12 @@ export class Parameters extends EventEmitter {
 			.then(waitUntilEvent<{ item: TOCItem, value: number }>(this, 'set'))
 			.then(data => data.value);
 	}
+
+	/**
+	 * Handle parameter response. Identical for both getting and setting a parameter.
+	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#parameter_read)
+	 * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#parameter_write)
+	 */
 
 	private handleParam(data: Buffer, mode: string) {
 		const types = BUFFER_TYPES(data);

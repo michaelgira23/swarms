@@ -37,7 +37,7 @@ async function main() {
 		console.log('******************************');
 
 		const parametersStart = new Date();
-		const toc = await drone.parameters.tocFetcher.start();
+		const toc = await drone.parameters.getTOC();
 
 		console.log('******************************');
 		console.log(`Parameters ready! After ${(Date.now() - parametersStart) / 1000}s`);

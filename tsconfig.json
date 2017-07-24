@@ -8,7 +8,6 @@
 		"outDir": "dist",
 		"pretty": true,
 		"sourceMap": true,
-		"sourceRoot": "src",
 		"target": "es2017"
 	},
 	"include": [

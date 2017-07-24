@@ -245,8 +245,8 @@ export class TOCFetcher extends EventEmitter {
 }
 
 export const enum TOC_TYPES {
-	PARAM = 'parameters',
-	LOG = 'logging'
+	PARAM,
+	LOG
 }
 
 export interface TOCCache {
