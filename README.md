@@ -40,7 +40,7 @@ error C2011: 'timespec': 'struct' type redefinition
 
 You can fix this by following the [directions here](https://github.com/libusb/libusb/issues/144#issuecomment-269832528).
 
-### Usage
+## Usage
 
 The following script moves the drone's propellers. More examples are located in the [`/examples`](https://github.com/michaelgira23/swarms/tree/master/examples) directory.
 
@@ -75,6 +75,10 @@ async function main() {
 	}
 }
 ```
+
+## Tutorial
+
+[Refer to the documentation](https://github.com/michaelgira23/swarms/blob/master/docs/table-of-contents.md) for tutorials on using the Crazyflie library.
 
 ## Troubleshooting
 

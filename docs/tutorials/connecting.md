@@ -1,6 +1,6 @@
 # Tutorials: Connecting to the Drone
 
-The first step in this aerospace adventure is having a Crazyflie 2.0 and Crazyradio (Bluetooth Low Energy is on the roadmap). The next step is connecting to the drone. The `swarms` library exposes a `Crazyradio` class that represents one Crazyradio. **After creating a Crazyradio object, you must immediately call `radio.init()` to do some asynchronous initial setup.**
+The first step in this aerospace adventure is having a Crazyflie 2.0 and Crazyradio (Bluetooth Low Energy is on the roadmap). The next step is connecting to the drone. The `swarms` library exposes a `Crazyradio` class that represents one Crazyradio. **After creating a Crazyradio object, you must immediately call `radio.init()` to do some initial asynchronous setup.**
 
 ```javascript
 const { Crazyradio } = require('swarms');
