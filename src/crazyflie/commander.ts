@@ -4,7 +4,6 @@ import { Packet } from '../packet';
 
 export class Commander {
 
-	// Set values initially at 0 or else it won't work
 	private currentSetpoint: Setpoint = {
 		roll: 0,
 		yaw: 0,

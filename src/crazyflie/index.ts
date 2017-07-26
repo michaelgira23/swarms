@@ -13,7 +13,7 @@ export const defaultCrazyflieOptions: CrazyflieOptions = {
 
 export class Crazyflie extends EventEmitter {
 
-	private initialized = false;
+	initialized = false;
 	options: CrazyflieOptions = defaultCrazyflieOptions;
 
 	commander = new Commander(this);
@@ -44,6 +44,16 @@ export class Crazyflie extends EventEmitter {
 		// Start interval to make sure Crazyflie maintains it's targetted roll, yaw, pitch, and thrust.
 		// It dies out after a few seconds otherwise.
 		this.commander.startSetpointInterval();
+		// Make absolutely sure that all values are initially set at 0 or else propellers won't move!
+		await this.commander.setpoint({
+			roll: 0,
+			yaw: 0,
+			pitch: 0,
+			thrust: 0
+		});
+
+		// Reset any previous logging
+		await this.logging.reset();
 
 		this.initialized = true;
 	}

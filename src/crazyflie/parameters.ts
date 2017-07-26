@@ -81,11 +81,8 @@ export class Parameters extends EventEmitter {
 
 	set(item: TOCItem, value: number) {
 
-		let id: number;
-		if (typeof item === 'number') {
-			id = item;
-		} else {
-			id = item.id;
+		if (item.readOnly) {
+			return Promise.reject(`Cannot set property "${item.group}.${item.name}" because it is read only!`);
 		}
 
 		const packet = new Packet();

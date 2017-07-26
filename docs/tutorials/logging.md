@@ -4,15 +4,15 @@ After getting the Crazyflie in the air, it may also be useful to read sensor dat
 
 ## Initialization
 
-Before reading any sensor data, it is **required** to retrieve the drone's logging Table of Contents (TOC). The TOC contains a list of all the drone's available properties to read from. You can retrieve its logging TOC like so:
+Before reading any sensor data, it is required to retrieve the drone's logging Table of Contents (TOC). The TOC contains a list of all the drone's available properties to read from. You can retrieve its logging TOC like so:
 
 ```javascript
 const toc = await drone.logging.getTOC();
 ```
 
-The TOC object is comprised of numerous "TOC items". Each item in represents one sensor value you can stream off the Crazyflie. It contains an `id`, `group`, `name`, and `type` property. After fetching the logging TOC once, a cached version should be available in the `cacheDir` value of the Crazyflie options (defaults to location of swarms module + `/cache`).
+The TOC object is comprised of numerous "TOC items". Each item represents one sensor value you can stream off the Crazyflie. It contains an `id`, `group`, `name`, and `type` property. After fetching the logging TOC once, a cached version should be available in the `cacheDir` value of the Crazyflie options (defaults to location of swarms module + `/cache`).
 
-It makes most sense to query the TOC items by their group and name. You can use the `TOC.getItem()` method. For example, to get the three different axis (`x`, `y`, and `z`) of the gyroscope, you can use the following:
+It makes most sense to query the TOC items by their group and name. This is available using the `TOC.getItem()` method. For example, to get the three different axis (`x`, `y`, and `z`) of the gyroscope, you can use the following:
 
 ```javascript
 const gyroX = toc.getItem('gyro', 'x');

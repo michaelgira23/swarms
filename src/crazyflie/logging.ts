@@ -249,7 +249,7 @@ export class Logging extends EventEmitter {
 	 * (https://wiki.bitcraze.io/projects:crazyflie:firmware:comm_protocol#log_settings_access_port_5_channel_1)
 	 */
 
-	resetLog() {
+	reset() {
 		this.blocks = [];
 
 		const packet = new Packet();
@@ -322,7 +322,10 @@ export class Logging extends EventEmitter {
 		const block = this.getBlock(blockId);
 
 		if (!block) {
-			this.emit('error', `Received data for block id "${blockId}" but we don't have that block!`);
+			// If drone hasn't initialized yet, we're about to reset the log so any previous blocks should be deleted
+			if (this.crazyflie.initialized) {
+				this.emit('error', `Received data for block id "${blockId}" but we don't have that block!`);
+			}
 			return;
 		}
 

@@ -29,8 +29,7 @@ async function main() {
 		const drone = await radio.connect(drones[0]);
 
 		await drone.commander.setpoint({
-			// thrust: 32500
-			thrust: 2000
+			thrust: 10001
 		});
 
 		// What to do if we exit the program via Ctrl + c
