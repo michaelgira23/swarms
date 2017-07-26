@@ -65,7 +65,7 @@ export class Logging extends EventEmitter {
 	 * Required before getting any logging data!
 	 */
 
-	getTOC() {
+	getTOC(): Promise<TOC> {
 		return this.tocFetcher.start();
 	}
 

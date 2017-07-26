@@ -54,7 +54,7 @@ export class Parameters extends EventEmitter {
 	 * Required before getting any logging data!
 	 */
 
-	getTOC() {
+	getTOC(): Promise<TOC> {
 		return this.tocFetcher.start();
 	}
 
