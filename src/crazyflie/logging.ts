@@ -317,6 +317,7 @@ export class Logging extends EventEmitter {
 		const blockId = types.int8.read(0);
 		// Timestamp is different because it's a 3-byte integer
 		// const timestamp = data.readIntLE(1, 3);
+		// However, we have no use for this at the moment
 
 		// Get block so we know what variables are and their data types
 		const block = this.getBlock(blockId);
