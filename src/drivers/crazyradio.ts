@@ -93,13 +93,6 @@ export class Crazyradio extends EventEmitter {
 		this.inEndpoint = this.interface.endpoints[0] as usb.InEndpoint;
 		this.outEndpoint = this.interface.endpoints[1] as usb.OutEndpoint;
 
-		// Configure Crazyradio
-		try {
-			await this.configure(options);
-		} catch (err) {
-			Promise.reject(`Problem configuring Crazyradio: ${err}`);
-		}
-
 		// Initialize USB streams
 		this.inStream = new InStream(this.inEndpoint);
 		this.outStream = new OutStream(this.outEndpoint);
@@ -108,6 +101,13 @@ export class Crazyradio extends EventEmitter {
 		this.inStream.on('error', this.onInStreamError.bind(this));
 
 		this.initialized = true;
+
+		// Configure Crazyradio
+		try {
+			await this.configure(options);
+		} catch (err) {
+			return Promise.reject(`Problem configuring Crazyradio: ${err}`);
+		}
 	}
 
 	/**
@@ -241,6 +241,9 @@ export class Crazyradio extends EventEmitter {
 	 */
 
 	sendPacket(packet: Packet) {
+		if (!this.initialized) {
+			return Promise.reject('Crazyradio not yet initialized! Did you remember to call `Crazyradio.init()` first?');
+		}
 		return new Promise((resolve, reject) => {
 			this.outStream.write(packet.export(), (err: string) => {
 				if (err) {
@@ -414,6 +417,9 @@ export class Crazyradio extends EventEmitter {
 	}
 
 	private sendVendorSetup(request: number, value: number, index = 0, data = BUFFERS.NOTHING) {
+		if (!this.initialized) {
+			return Promise.reject('Crazyradio not yet initialized! Did you remember to call `Crazyradio.init()` first?');
+		}
 		return new Promise<void>((resolve, reject) => {
 			this.device.controlTransfer(
 				BM_REQUEST_TYPE,
@@ -433,6 +439,9 @@ export class Crazyradio extends EventEmitter {
 	}
 
 	private getVendorSetup(request: number, value: number, index: number, length: number) {
+		if (!this.initialized) {
+			return Promise.reject('Crazyradio not yet initialized! Did you remember to call `Crazyradio.init()` first?');
+		}
 		return new Promise<Buffer>((resolve, reject) => {
 			this.device.controlTransfer(
 				BM_REQUEST_TYPE | usb.LIBUSB_ENDPOINT_IN,

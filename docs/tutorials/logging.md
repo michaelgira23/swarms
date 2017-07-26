@@ -1,4 +1,4 @@
-# Tutorials: Logging
+# Tutorials: Getting Logging Data
 
 After getting the Crazyflie in the air, it may also be useful to read sensor data. You can do this by using the `logging` subsystem.
 
@@ -100,7 +100,7 @@ drone.logging.data.on('gyro.x', data => {
 
 ## Putting It All Together
 
-Combining everything covered in the past few sections, this is what the code should look like in the end to log gyroscope data:
+Combining everything covered in this tutorial, this is what the code should look like to log gyroscope data:
 
 ```javascript
 const toc = await drone.logging.getTOC();

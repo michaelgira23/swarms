@@ -1,4 +1,4 @@
-# Tutorials: Parameters
+# Tutorials: Getting and Setting Parameters
 
 Another useful thing to do is get and set the settings or "parameters" on the Crazyflie. This can be achieved by, you guessed it, the parameters subsystem.
 
@@ -38,6 +38,22 @@ console.log(newValue);
 // If you try to set a read-only property
 await drone.parameters.set(paramTOC.getItem('cpu', 'flash'), 1234);
 // Throws: Cannot set property "cpu.flash" because it is read-only!
+```
+
+## Putting It All Together
+
+Combining everything covered in this tutorial, this is what the code should look like to get and set the `althold` mode of the Crazyflie.
+
+```javascript
+const toc = await drone.parameters.getTOC();
+
+const altHold = toc.getItem('flightmode', 'althold');
+
+// Current value whether or not drone is in `althold` mode
+const isHold = await drone.parameters.get(altHold);
+
+// New value of parameter. Should be identical to second argument (1)
+const newValue = await drone.parameters.set(altHold, 1);
 ```
 
 ## Full Example

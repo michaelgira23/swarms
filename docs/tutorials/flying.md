@@ -1,4 +1,4 @@
-# Tutorials: Flying
+# Tutorials: Flying the Drone
 
 To get the drone flying, use the `commander` subsystem of the Crazyflie. It exposes a `setpoint()` method which can be passed in an object to control its `roll`, `yaw`, `pitch`, and `thrust` like so:
 

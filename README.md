@@ -20,7 +20,7 @@ There were too many outdated and undocumented node.js libraries out there for pr
 
 This package assumes you have the latest version of the Crazyflie firmware. You can find [instructions on the Bitcraze website](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw) on how to update your firmware.
 
-##### Crazyradio Driver on Windows
+#### Crazyradio Driver on Windows
 
 If on a Windows machine, look on [the Bitcraze wiki](https://wiki.bitcraze.io/doc:crazyradio:index#drivers) for instructions on how to install the correct driver onto your Crazyradio. You do not need to do this on macOS or Linux!
 

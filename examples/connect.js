@@ -1,5 +1,5 @@
 /**
- * Connect to a Crazyflie
+ * Connects to a Crazyflie, waits 3 seconds, then disconnects
  */
 
 const { Crazyradio } = require('../dist/index');
@@ -27,6 +27,7 @@ async function main() {
 		}
 
 		const drone = await radio.connect(drones[0]);
+		console.log('Connected!');
 
 		setTimeout(async () => {
 			console.log('Disconnect!');
