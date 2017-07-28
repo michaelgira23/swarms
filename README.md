@@ -2,8 +2,9 @@
 
 The ultimate node.js client for controlling Bitcraze Crazyflie 2.0 drones
 
-[![Dependency Status](https://img.shields.io/david/michaelgira23/swarms.svg)]()
-[![Dev Dependency Status](https://img.shields.io/david/dev/michaelgira23/swarms.svg)]()
+![npm](https://img.shields.io/npm/v/swarms.svg)
+![Dependency Status](https://img.shields.io/david/michaelgira23/swarms.svg)
+![Dev Dependency Status](https://img.shields.io/david/dev/michaelgira23/swarms.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/michaelgira23/swarms/master/LICENSE)
 
 Warning: This projects is going under heavy active development!
@@ -111,6 +112,16 @@ Before making a pull request, make sure your code passes linting and unit tests 
 ```
 $ npm test
 ```
+
+### Generating Documentation
+
+To automatically generate documentation with `TypeDoc`, run:
+
+```
+$ npm run docs
+```
+
+This will generate an `/api-reference` folder with a static site.
 
 ## License
 
