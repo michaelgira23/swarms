@@ -2,12 +2,11 @@
 
 The ultimate node.js client for controlling Bitcraze Crazyflie 2.0 drones
 
-![npm](https://img.shields.io/npm/v/swarms.svg)
-![Dependency Status](https://img.shields.io/david/michaelgira23/swarms.svg)
-![Dev Dependency Status](https://img.shields.io/david/dev/michaelgira23/swarms.svg)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/michaelgira23/swarms/master/LICENSE)
-
-Warning: This projects is going under heavy active development!
+[![npm](https://img.shields.io/npm/v/swarms.svg)](https://www.npmjs.com/package/swarms)
+[![npm](https://img.shields.io/npm/dm/swarms.svg)](https://www.npmjs.com/package/swarms)
+[![Travis](https://img.shields.io/travis/michaelgira23/swarms.svg)](https://travis-ci.org/michaelgira23/swarms)
+[![Dependency Status](https://img.shields.io/david/michaelgira23/swarms.svg)](https://david-dm.org/michaelgira23/swarms)
+[![Dev Dependency Status](https://img.shields.io/david/dev/michaelgira23/swarms.svg)](https://david-dm.org/michaelgira23/swarms?type=dev)
 
 ## Motive
 
@@ -75,9 +74,9 @@ async function main() {
 }
 ```
 
-## Tutorial
+## Documentation
 
-Refer to [the documentation](https://github.com/michaelgira23/swarms/blob/master/docs/table-of-contents.md) for tutorials on using the swarms library.
+Check out [the repository documentation](https://github.com/michaelgira23/swarms/blob/master/docs/table-of-contents.md) for information, tutorials, and more!
 
 ## Troubleshooting
 
@@ -103,9 +102,17 @@ During development, it may be useful to automagically compile on any file change
 $ npm run ts:watch
 ```
 
+### Linting
+
+Make sure your code is formatted correctly by running:
+
+```
+$ npm run lint
+```
+
 ### Testing
 
-Before making a pull request, make sure your code passes linting and unit tests by using:
+Make sure your code passes linting and unit tests by using:
 
 ```
 $ npm test
