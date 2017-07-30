@@ -13,19 +13,17 @@ Warning: This projects is going under heavy active development!
 
 There were too many outdated and undocumented node.js libraries out there for programming Crazyflies. This package's goal is to fix that.
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+### Crazyflie Firmware
 
-#### Crazyflie Firmware
+This package assumes you have the [latest version of the Crazyflie firmware](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw).
 
-This package assumes you have the latest version of the Crazyflie firmware. You can find [instructions on the Bitcraze website](https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw) on how to update your firmware.
+### Crazyradio Driver on Windows
 
-#### Crazyradio Driver on Windows
+If on a Windows machine, look on [the Bitcraze wiki for instructions](https://wiki.bitcraze.io/doc:crazyradio:index#drivers) to install the correct driver onto your Crazyradio. You do not need to do this on macOS or Linux!
 
-If on a Windows machine, look on [the Bitcraze wiki](https://wiki.bitcraze.io/doc:crazyradio:index#drivers) for instructions on how to install the correct driver onto your Crazyradio. You do not need to do this on macOS or Linux!
-
-### Installation
+## Installation
 
 This package's main dependency is `node-usb`. [Refer to its installation directions](https://github.com/tessel/node-usb#installation) for any help installing it on your operating system.
 
@@ -33,7 +31,7 @@ This package's main dependency is `node-usb`. [Refer to its installation directi
 $ npm install swarms
 ```
 
-Note: On Windows, you may fail to install the `node-usb` package getting errors like:
+Note: On Windows, you may get errors installing the `node-usb` package like the following: you may fail to install the `node-usb` package getting errors like:
 
 ```
 error C2011: 'timespec': 'struct' type redefinition
@@ -79,7 +77,7 @@ async function main() {
 
 ## Tutorial
 
-[Refer to the documentation](https://github.com/michaelgira23/swarms/blob/master/docs/table-of-contents.md) for tutorials on using the Crazyflie library.
+Refer to [the documentation](https://github.com/michaelgira23/swarms/blob/master/docs/table-of-contents.md) for tutorials on using the swarms library.
 
 ## Troubleshooting
 
@@ -87,7 +85,7 @@ Got a problem? Refer to the [troubleshooting page](https://github.com/michaelgir
 
 ## Contributing
 
-Encounter a bug? Have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new) PR's are also welcome!
+Encounter a bug or have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new) Pull requests also welcome!
 
 ## Development
 
