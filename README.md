@@ -84,49 +84,7 @@ Got a problem? Refer to the [troubleshooting page](https://github.com/michaelgir
 
 ## Contributing
 
-Encounter a bug or have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new) Pull requests also welcome!
-
-## Development
-
-### Compiling
-
-This project uses TypeScript. To compile from source, run:
-
-```
-$ npm run ts
-```
-
-During development, it may be useful to automagically compile on any file changes. Do this by running:
-
-```
-$ npm run ts:watch
-```
-
-### Linting
-
-Make sure your code is formatted correctly by running:
-
-```
-$ npm run lint
-```
-
-### Testing
-
-Make sure your code passes linting and unit tests by using:
-
-```
-$ npm test
-```
-
-### Generating Documentation
-
-To automatically generate documentation with `TypeDoc`, run:
-
-```
-$ npm run docs
-```
-
-This will generate an `/api-reference` folder with a static site.
+Encounter a bug or have an idea for a new feature? [Open up an issue!](https://github.com/michaelgira23/swarms/issues/new) Pull requests also welcome! Check out the [Contributing Guide](https://github.com/michaelgira23/swarms/blob/master/CONTRIBUTING.md) for more details.
 
 ## License
 
