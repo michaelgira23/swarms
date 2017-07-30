@@ -8,7 +8,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "docs": "typedoc --out ./api-reference ./src/",
+    "docs": "typedoc --out ./api-reference --mode file ./src/",
     "lint": "tslint --type-check --project tsconfig.json \"src/**/*.ts\"",
     "prepublishOnly": "rimraf ./dist && npm run ts",
     "test": "npm run lint",

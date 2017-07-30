@@ -3,5 +3,19 @@ node_js:
     - "node"
     - "7"
     - "6"
+os:
+    - linux
+    - osx
 before_install:
-    - sudo apt-get install build-essential libudev-dev
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install build-essential libudev-dev; fi
+script:
+    - npm test
+    - npm run prepublishOnly
+    - npm run docs
+deploy:
+    provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    local_dir: ./api-reference
+    on:
+        tags: true
