@@ -58,4 +58,4 @@ const newValue = await drone.parameters.set(altHold, 1);
 
 ## Full Example
 
-A full working example is located in [`/examples/params.js`](https://github.com/michaelgira23/swarms/blob/master/examples/params.js).
+A full working example is located in [`/examples/params-test.js`](https://github.com/michaelgira23/swarms/blob/master/examples/params-test.js).
