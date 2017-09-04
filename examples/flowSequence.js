@@ -1,8 +1,13 @@
 /**
- * Hover 1 meter in the air. Requires the Flow deck!
+ * Autonomous flight with the Flow deck
+ * Implementation of (https://github.com/bitcraze/crazyflie-lib-python/blob/master/examples/flowsequenceSync.py)
  */
 
 const { Crazyradio, utils } = require('../dist/index');
+// How high drone should be (in meters)
+const hoverDistance = 0.4;
+// How fast drone should move (in m/s)
+const speed = 0.5;
 
 // Because you can only use `await` within an async function...
 main();
@@ -50,9 +55,42 @@ async function main() {
 		console.log('Done! All clear for takeoff.')
 		console.log('******************************');
 
+		for (let i = 0; i <= 1; i += 0.1) {
+			await drone.commander.hoverSetpoint({
+				zDistance: (i / 1) * hoverDistance
+			});
+			await utils.wait(100);
+		}
+		await utils.wait(2000);
+
+
 		await drone.commander.hoverSetpoint({
-			zDistance: 1
+			velocityX: speed,
+			yawRate: 36 * 2
 		});
+		await utils.wait(5000);
+
+
+		await drone.commander.hoverSetpoint({
+			velocityX: speed,
+			yawRate: -36 * 2
+		});
+		await utils.wait(5000);
+
+		await drone.commander.hoverSetpoint({
+			velocityX: 0,
+			yawRate: 0
+		});
+		await utils.wait(2000);
+
+		for (let i = 0; i <= 1; i += 0.1) {
+			await drone.commander.hoverSetpoint({
+				zDistance: hoverDistance - ((i / 1) * hoverDistance)
+			});
+			await utils.wait(100);
+		}
+
+		await drone.commander.stopSetpoint();
 
 	} catch (err) {
 		console.log('Uh oh!', err);
