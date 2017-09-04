@@ -1,6 +1,6 @@
 {
   "name": "swarms",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The ultimate node.js library for controlling Bitcraze Crazyflie 2.0 drones",
   "files": [
     "dist"
