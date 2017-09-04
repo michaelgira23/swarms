@@ -66,11 +66,12 @@ export const VENDOR_REQUESTS = {
  */
 
 export const PORTS = {
-	CONSOLE    : 0,
-	PARAMETERS : 2,
-	COMMANDER  : 3,
-	LOGGING    : 5,
-	LINK_LAYER : 15
+	CONSOLE           : 0,
+	PARAMETERS        : 2,
+	COMMANDER         : 3,
+	LOGGING           : 5,
+	COMMANDER_GENERIC : 7,
+	LINK_LAYER        : 15
 };
 
 export const MAX_PAYLOAD_SIZE = 31;
@@ -109,6 +110,14 @@ export const COMMANDS = {
 		START_BLOCK  : 3,
 		STOP_BLOCK   : 4,
 		RESET_LOG    : 5
+	},
+	// (https://wiki.bitcraze.io/doc:crazyflie:crtp:generic_setpoint)
+	// (https://github.com/bitcraze/crazyflie-lib-python/blob/master/cflib/crazyflie/commander.py)
+	COMMANDER_GENERIC: {
+		STOP           : 0,
+		VELOCITY_WORLD : 1,
+		Z_DISTANCE     : 2,
+		HOVER          : 5
 	}
 };
 
