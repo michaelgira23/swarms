@@ -91,6 +91,7 @@ async function main() {
 		}
 
 		await drone.commander.stopSetpoint();
+		await radio.close();
 
 	} catch (err) {
 		console.log('Uh oh!', err);
