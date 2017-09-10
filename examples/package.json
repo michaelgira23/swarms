@@ -1,0 +1,13 @@
+{
+  "name": "swarms-examples",
+  "version": "0.3.0",
+  "description": "Examples for the swarms library",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Gira",
+  "license": "MIT",
+  "dependencies": {
+    "gamepad": "^1.4.2"
+  }
+}

@@ -51,7 +51,7 @@ async function main() {
 		console.log('******************************');
 
 		await drone.commander.hoverSetpoint({
-			zDistance: 1
+			zDistance: 0.25
 		});
 
 	} catch (err) {
