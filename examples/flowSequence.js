@@ -43,7 +43,7 @@ async function main() {
 		const resetKalman = toc.getItem('kalman', 'resetEstimation');
 
 		console.log('******************************');
-		console.log('Resetting Position Estimation...')
+		console.log('Resetting Position Estimation...');
 		console.log('******************************');
 
 		drone.parameters.set(resetKalman, '1');
@@ -52,7 +52,7 @@ async function main() {
 		await utils.wait(2000);
 
 		console.log('******************************');
-		console.log('Done! All clear for takeoff.')
+		console.log('Done! All clear for takeoff.');
 		console.log('******************************');
 
 		for (let i = 0; i <= 1; i += 0.1) {

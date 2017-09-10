@@ -32,6 +32,10 @@ export const defaultHoverSetpoint: HoverSetpoint = {
 
 export class Commander {
 
+	get currentSetpoint(): Setpoint | VelocityWorldSetpoint | ZDistanceSetpoint | HoverSetpoint {
+		return this.lastArgs;
+	}
+
 	private lastFunction: SETPOINT_TYPE = null;
 	private lastArgs: Setpoint | VelocityWorldSetpoint | ZDistanceSetpoint | HoverSetpoint;
 
