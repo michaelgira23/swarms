@@ -126,7 +126,7 @@ export class Logging extends EventEmitter {
 			const type = LOGGING_TYPES[variable.type];
 			packet
 				.write('int8', type << 4 | type)
-				.write('int8', variable.id);
+				.write('uInt8', variable.id);
 		}
 
 		return this.crazyflie.radio.sendPacket(packet)

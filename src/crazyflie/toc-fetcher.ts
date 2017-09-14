@@ -74,7 +74,7 @@ export class TOCFetcher extends EventEmitter {
 
 	async handleTOCInfo(data: Buffer) {
 		const types = BUFFER_TYPES(data);
-		this.length = types.int8.read(0);
+		this.length = types.uInt8.read(0);
 		this.crc = types.int32.read(1);
 
 		if (this.type === TOC_TYPES.LOG) {
@@ -132,7 +132,7 @@ export class TOCFetcher extends EventEmitter {
 
 		packet
 			.write('int8', COMMANDS.TOC.GET_ITEM)
-			.write('int8', id);
+			.write('uInt8', id);
 
 		return this.crazyflie.radio.sendPacket(packet);
 	}
@@ -145,7 +145,7 @@ export class TOCFetcher extends EventEmitter {
 	async handleTOCItem(data: Buffer) {
 		const types = BUFFER_TYPES(data);
 
-		const id = types.int8.read(0);
+		const id = types.uInt8.read(0);
 		const metadata = types.int8.read(1);
 
 		let type: Type;

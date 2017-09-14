@@ -258,8 +258,6 @@ export class Crazyradio extends EventEmitter {
 	private onInStreamData(data: Buffer) {
 		const ackPack = new Ack(data);
 
-		// console.log('Received data', ackPack);
-
 		this.emit('all', ackPack);
 
 		// If ack pack lacks the feedback, it's a slack
