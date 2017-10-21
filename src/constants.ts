@@ -212,7 +212,7 @@ export const BUFFERS = {
  * We need to bind the `this` context to the functions otherwise it won't work
  */
 
-export function BUFFER_TYPES(buffer: Buffer): { [type: string]: TypeData } {
+export function BUFFER_TYPES(buffer: Buffer): Partial<Record<Type, TypeData>> {
 	return {
 		double: {
 			size: 8,
