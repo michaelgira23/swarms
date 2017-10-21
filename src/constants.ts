@@ -3,6 +3,7 @@
  */
 
 // import * as ieee754 from 'ieee754';
+import { properEnumKeys } from './utils';
 
 /**
  * Crazyradio constants
@@ -14,14 +15,14 @@ export const CRAZYRADIO = {
 	PID: 0x7777  // Product ID of dongle
 };
 
-export const DATA_RATES: SortaEnum = {
-	'250K' : 0,
-	'1M'   : 1,
-	'2M'   : 2
-};
+export enum DATA_RATES {
+	'250K',
+	'1M',
+	'2M'
+}
 
 export function GET_DATA_RATE(targetRate: number) {
-	for (const rate of Object.keys(DATA_RATES)) {
+	for (const rate of properEnumKeys(DATA_RATES)) {
 		if (DATA_RATES[rate] === targetRate) {
 			return rate;
 		}
@@ -29,15 +30,15 @@ export function GET_DATA_RATE(targetRate: number) {
 	return null;
 }
 
-export const RADIO_POWERS: SortaEnum = {
-	'-18dBm' : 0,
-	'-12dBm' : 1,
-	'-6dBm'  : 2,
-	'0dBm'   : 3
-};
+export enum RADIO_POWERS {
+	'-18dBm',
+	'-12dBm',
+	'-6dBm',
+	'0dBm'
+}
 
 export function GET_RADIO_POWER(targetPower: number) {
-	for (const power of Object.keys(RADIO_POWERS)) {
+	for (const power of properEnumKeys(RADIO_POWERS)) {
 		if (RADIO_POWERS[power] === targetPower) {
 			return power;
 		}
@@ -126,24 +127,26 @@ export const COMMANDS = {
  * (https://wiki.bitcraze.io/doc:crazyflie:crtp:param#toc_access)
  */
 
-export const PARAM_TYPES: SortaEnum = {
-	int8   : 0,
-	int16  : 1,
-	int32  : 2,
-	int64  : 3,
-	fp16   : 5,
-	float  : 6,
-	double : 7,
-	uInt8  : 8,
-	uInt16 : 9,
-	uInt32 : 10,
-	uInt64 : 11
-};
+export enum PARAM_TYPES {
+	int8,
+	int16,
+	int32,
+	int64,
+	fp16 = 5,
+	float,
+	double,
+	uInt8,
+	uInt16,
+	uInt32,
+	uInt64
+}
+
+export type Type = keyof typeof PARAM_TYPES;
 
 export function GET_PARAM_TYPE(typeValue: number) {
-	for (const type of Object.keys(PARAM_TYPES)) {
+	for (const type of properEnumKeys(PARAM_TYPES)) {
 		if (PARAM_TYPES[type] === typeValue) {
-			return (type as Type);
+			return type;
 		}
 	}
 	return null;
@@ -154,21 +157,21 @@ export function GET_PARAM_TYPE(typeValue: number) {
  * (https://wiki.bitcraze.io/projects:crazyflie:firmware:log#firmware_usage)
  */
 
-export const LOGGING_TYPES: SortaEnum = {
-	uInt8  : 1,
-	uInt16 : 2,
-	uInt32 : 3,
-	int8   : 4,
-	int16  : 5,
-	int32  : 6,
-	float  : 7,
-	fp16   : 8
-};
+export enum LOGGING_TYPES {
+	uInt8 = 1,
+	uInt16,
+	uInt32,
+	int8,
+	int16,
+	int32,
+	float,
+	fp16
+}
 
 export function GET_LOGGING_TYPE(typeValue: number) {
-	for (const type of Object.keys(LOGGING_TYPES)) {
+	for (const type of properEnumKeys(LOGGING_TYPES)) {
 		if (LOGGING_TYPES[type] === typeValue) {
-			return (type as Type);
+			return type;
 		}
 	}
 	return null;
@@ -210,6 +213,7 @@ export const BUFFERS = {
 /**
  * Factory to return read and write functions for a buffer
  * We need to bind the `this` context to the functions otherwise it won't work
+ * @TODO Implement i64/u64/fp16 functions and get rid of Partial<T>
  */
 
 export function BUFFER_TYPES(buffer: Buffer): Partial<Record<Type, TypeData>> {
@@ -267,28 +271,8 @@ export function BUFFER_TYPES(buffer: Buffer): Partial<Record<Type, TypeData>> {
 	};
 }
 
-export type Type = 'double'
-	| 'float'
-	| 'int8'
-	| 'int16'
-	| 'int32'
-	| 'int64'
-	| 'uInt8'
-	| 'uInt16'
-	| 'uInt32'
-	| 'uInt64'
-	| 'fp16';
-
 export interface TypeData {
 	size: number; // Size in bytes
 	read: (offset: number, noAssert?: boolean) => number;
 	write: (value: number, offset: number, noAssert?: boolean) => number;
-}
-
-/**
- * Because we need a table of fixed values that we can also look up the index, unlike the actual TypeScript enum
- */
-
-export interface SortaEnum {
-	[key: string]: number;
 }
