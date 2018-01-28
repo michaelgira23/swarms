@@ -1,0 +1,381 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>swarms</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">swarms</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> swarms</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="swarms">swarms</h1>
+				<p>The ultimate node.js client for controlling Bitcraze Crazyflie 2.0 drones</p>
+				<p><a href="https://www.npmjs.com/package/swarms"><img src="https://img.shields.io/npm/v/swarms.svg" alt="npm"></a>
+					<a href="https://www.npmjs.com/package/swarms"><img src="https://img.shields.io/npm/dm/swarms.svg" alt="npm"></a>
+					<a href="https://travis-ci.org/michaelgira23/swarms"><img src="https://img.shields.io/travis/michaelgira23/swarms.svg" alt="Travis"></a>
+					<a href="https://david-dm.org/michaelgira23/swarms"><img src="https://img.shields.io/david/michaelgira23/swarms.svg" alt="Dependency Status"></a>
+				<a href="https://david-dm.org/michaelgira23/swarms?type=dev"><img src="https://img.shields.io/david/dev/michaelgira23/swarms.svg" alt="Dev Dependency Status"></a></p>
+				<h2 id="motive">Motive</h2>
+				<p>There were too many outdated and undocumented node.js libraries out there for programming Crazyflies. This package&#39;s goal is to fix that.</p>
+				<h2 id="prerequisites">Prerequisites</h2>
+				<h3 id="crazyflie-firmware">Crazyflie Firmware</h3>
+				<p>This package assumes you have the <a href="https://www.bitcraze.io/getting-started-with-the-crazyflie-2-0/#latest-fw">latest version of the Crazyflie firmware</a>.</p>
+				<h3 id="crazyradio-driver-on-windows">Crazyradio Driver on Windows</h3>
+				<p>If on a Windows machine, look on <a href="https://wiki.bitcraze.io/doc:crazyradio:index#drivers">the Bitcraze wiki for instructions</a> to install the correct driver onto your Crazyradio. You do not need to do this on macOS or Linux!</p>
+				<h2 id="installation">Installation</h2>
+				<p>This package&#39;s main dependency is <code>node-usb</code>. <a href="https://github.com/tessel/node-usb#installation">Refer to its installation directions</a> for any help installing it on your operating system.</p>
+				<pre><code><span class="hljs-meta">$</span><span class="bash"> npm install swarms</span>
+</code></pre><p>Note: On Windows, you may get errors installing the <code>node-usb</code> package like the following: you may fail to install the <code>node-usb</code> package getting errors like:</p>
+				<pre><code><span class="hljs-keyword">error </span>C2011: 'timespec': 'struct' type redefinition
+</code></pre><p>You can fix this by following the <a href="https://github.com/libusb/libusb/issues/144#issuecomment-269832528">directions here</a>.</p>
+				<h2 id="usage">Usage</h2>
+				<p>The following script moves the drone&#39;s propellers. More examples are located in the <a href="https://github.com/michaelgira23/swarms/tree/master/examples"><code>/examples</code></a> directory.</p>
+				<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { Crazyradio } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'swarms'</span>);
+
+<span class="hljs-keyword">const</span> radio = <span class="hljs-keyword">new</span> Crazyradio();
+
+<span class="hljs-comment">// Because you can only use `await` within an async function...</span>
+main();
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">main</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">await</span> radio.init();
+        <span class="hljs-keyword">const</span> drones = <span class="hljs-keyword">await</span> radio.findDrones();
+
+        <span class="hljs-keyword">if</span> (drones.length &lt; <span class="hljs-number">1</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-string">'Could not find any drones!'</span>;
+        }
+
+        <span class="hljs-keyword">const</span> drone = <span class="hljs-keyword">await</span> radio.connect(drones[<span class="hljs-number">0</span>]);
+
+        <span class="hljs-keyword">await</span> drone.commander.setpoint({
+            <span class="hljs-attr">roll</span>  : <span class="hljs-number">0</span>,
+            <span class="hljs-attr">yaw</span>   : <span class="hljs-number">0</span>,
+            <span class="hljs-attr">pitch</span> : <span class="hljs-number">0</span>,
+            <span class="hljs-attr">thrust</span>: <span class="hljs-number">32500</span>
+        });
+
+    } <span class="hljs-keyword">catch</span> (err) {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Uh oh!'</span>, err);
+        <span class="hljs-keyword">await</span> radio.close();
+    }
+}
+</code></pre>
+				<h2 id="documentation">Documentation</h2>
+				<p>Check out <a href="https://github.com/michaelgira23/swarms/blob/master/docs/table-of-contents.md">the repository documentation</a> for information, tutorials, and more!</p>
+				<h2 id="troubleshooting">Troubleshooting</h2>
+				<p>Got a problem? Refer to the <a href="https://github.com/michaelgira23/swarms/blob/master/docs/troubleshooting.md">troubleshooting page</a> in the documentation. If that doesn&#39;t help, <a href="https://github.com/michaelgira23/swarms/issues/new">create an issue.</a></p>
+				<h2 id="contributing">Contributing</h2>
+				<p>Encounter a bug or have an idea for a new feature? <a href="https://github.com/michaelgira23/swarms/issues/new">Open up an issue!</a> Pull requests also welcome! Check out the <a href="https://github.com/michaelgira23/swarms/blob/master/CONTRIBUTING.md">Contributing Guide</a> for more details.</p>
+				<h2 id="license">License</h2>
+				<p>This project is under the <a href="https://github.com/michaelgira23/swarms/blob/master/LICENSE">MIT License</a>.</p>
+				<h2 id="acknowledgments">Acknowledgments</h2>
+				<p>Special thanks to the following people, whose libraries were used as a reference:</p>
+				<ul>
+					<li><a href="https://github.com/bitcraze/crazyflie-lib-python">Bitcraze team&#39;s <code>crazyflie-lib-python</code> library</a></li>
+					<li><a href="https://github.com/ceejbot/aerogel">C J Silverio&#39;s <code>aerogel</code> library</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-enum">
+						<a href="enums/data_rates.html" class="tsd-kind-icon">DATA_<wbr>RATES</a>
+					</li>
+					<li class=" tsd-kind-enum">
+						<a href="enums/logging_types.html" class="tsd-kind-icon">LOGGING_<wbr>TYPES</a>
+					</li>
+					<li class=" tsd-kind-enum">
+						<a href="enums/param_types.html" class="tsd-kind-icon">PARAM_<wbr>TYPES</a>
+					</li>
+					<li class=" tsd-kind-enum">
+						<a href="enums/radio_powers.html" class="tsd-kind-icon">RADIO_<wbr>POWERS</a>
+					</li>
+					<li class=" tsd-kind-enum tsd-is-not-exported">
+						<a href="enums/setpoint_type.html" class="tsd-kind-icon">SETPOINT_<wbr>TYPE</a>
+					</li>
+					<li class=" tsd-kind-enum">
+						<a href="enums/toc_types.html" class="tsd-kind-icon">TOC_<wbr>TYPES</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/ack.html" class="tsd-kind-icon">Ack</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/commander.html" class="tsd-kind-icon">Commander</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/crazyflie.html" class="tsd-kind-icon">Crazyflie</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/crazyradio.html" class="tsd-kind-icon">Crazyradio</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/instream.html" class="tsd-kind-icon">In<wbr>Stream</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/logging.html" class="tsd-kind-icon">Logging</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/outstream.html" class="tsd-kind-icon">Out<wbr>Stream</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/packet.html" class="tsd-kind-icon">Packet</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/parameters.html" class="tsd-kind-icon">Parameters</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/toc.html" class="tsd-kind-icon">TOC</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/tocfetcher.html" class="tsd-kind-icon">TOCFetcher</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/uri.html" class="tsd-kind-icon">Uri</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/block.html" class="tsd-kind-icon">Block</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/crazyflieoptions.html" class="tsd-kind-icon">Crazyflie<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/crazyradiooptions.html" class="tsd-kind-icon">Crazyradio<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/hoversetpoint.html" class="tsd-kind-icon">Hover<wbr>Setpoint</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/setpoint.html" class="tsd-kind-icon">Setpoint</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/toccache.html" class="tsd-kind-icon">TOCCache</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/tocitem.html" class="tsd-kind-icon">TOCItem</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/typedata.html" class="tsd-kind-icon">Type<wbr>Data</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/velocityworldsetpoint.html" class="tsd-kind-icon">Velocity<wbr>World<wbr>Setpoint</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/zdistancesetpoint.html" class="tsd-kind-icon">ZDistance<wbr>Setpoint</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#type" class="tsd-kind-icon">Type</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="globals.html#bm_request_type" class="tsd-kind-icon">BM_<wbr>REQUEST_<wbr>TYPE</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="globals.html#max_payload_size" class="tsd-kind-icon">MAX_<wbr>PAYLOAD_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#buffer_types" class="tsd-kind-icon">BUFFER_<wbr>TYPES</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#get_data_rate" class="tsd-kind-icon">GET_<wbr>DATA_<wbr>RATE</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#get_logging_type" class="tsd-kind-icon">GET_<wbr>LOGGING_<wbr>TYPE</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#get_param_type" class="tsd-kind-icon">GET_<wbr>PARAM_<wbr>TYPE</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#get_radio_power" class="tsd-kind-icon">GET_<wbr>RADIO_<wbr>POWER</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="globals.html#properenumkeys" class="tsd-kind-icon">proper<wbr>Enum<wbr>Keys</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#round" class="tsd-kind-icon">round</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#tobinary" class="tsd-kind-icon">to<wbr>Binary</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#tohex" class="tsd-kind-icon">to<wbr>Hex</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#wait" class="tsd-kind-icon">wait</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="globals.html#waituntilevent" class="tsd-kind-icon">wait<wbr>Until<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#block_errors" class="tsd-kind-icon">BLOCK_<wbr>ERRORS</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#buffers" class="tsd-kind-icon">BUFFERS</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#channels" class="tsd-kind-icon">CHANNELS</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#commands" class="tsd-kind-icon">COMMANDS</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#crazyradio" class="tsd-kind-icon">CRAZYRADIO</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#ports" class="tsd-kind-icon">PORTS</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#vendor_requests" class="tsd-kind-icon">VENDOR_<wbr>REQUESTS</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#defaultcrazyflieoptions" class="tsd-kind-icon">default<wbr>Crazyflie<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#defaulthoversetpoint" class="tsd-kind-icon">default<wbr>Hover<wbr>Setpoint</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#defaultoptions" class="tsd-kind-icon">default<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#defaultsetpoint" class="tsd-kind-icon">default<wbr>Setpoint</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#defaultvelocityworldsetpoint" class="tsd-kind-icon">default<wbr>Velocity<wbr>World<wbr>Setpoint</a>
+					</li>
+					<li class=" tsd-kind-object-literal">
+						<a href="globals.html#defaultzdistancesetpoint" class="tsd-kind-icon">defaultZDistance<wbr>Setpoint</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
