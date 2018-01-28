@@ -9,7 +9,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "docs": "typedoc --out ./api-reference --mode file ./src/",
-    "lint": "tslint --type-check --project tsconfig.json \"src/**/*.ts\"",
+    "lint": "tslint --project tsconfig.json --config tslint.json \"src/**/*.ts\"",
     "prepublishOnly": "rimraf ./dist && npm run ts",
     "test": "npm run lint",
     "ts": "tsc",
