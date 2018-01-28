@@ -12,7 +12,6 @@ import {
 import { Crazyflie } from '../crazyflie';
 import { Ack, Packet } from '../packet';
 import { Uri } from '../uri';
-import { InterfaceFixed } from '../usb-types-fix';
 import { properEnumKeys, toHex } from '../utils';
 import { InStream, OutStream } from './usbstreams';
 
@@ -140,7 +139,7 @@ export class Crazyradio extends EventEmitter {
 				this.initialized = false;
 			}
 
-			(this.interface as InterfaceFixed).release(true, err => {
+			this.interface.release(true, err => {
 				if (err) {
 					reject(err);
 					return;
