@@ -12,7 +12,7 @@ import {
 import { Crazyflie } from '../crazyflie';
 import { Ack, Packet } from '../packet';
 import { Uri } from '../uri';
-import { toHex } from '../utils';
+import { properEnumKeys, toHex } from '../utils';
 import { InStream, OutStream } from './usbstreams';
 
 import { EventEmitter } from 'events';
@@ -198,7 +198,7 @@ export class Crazyradio extends EventEmitter {
 			const prevARC = this.options.arc;
 			await this.setAckRetryCount(1);
 			let drones: Uri[] = [];
-			for (const rate of Object.keys(DATA_RATES)) {
+			for (const rate of properEnumKeys(DATA_RATES)) {
 				drones = drones.concat(await this.scanRange(DATA_RATES[rate]));
 			}
 			await this.setAckRetryCount(prevARC);

@@ -72,3 +72,12 @@ export function waitUntilEvent<T>(emitter: EventEmitter, eventName: string) {
 		});
 	});
 }
+
+/**
+ * Takes a TypeScript enum and returns the actual list of keys.
+ * Since enums have reverse lookup keys as well, this has to be done when checking for the _actual_ keys.
+ */
+
+export function properEnumKeys<T extends object>(enumObj: T): Array<keyof T> {
+	return Object.values(enumObj).filter(v => typeof v === 'string');
+}

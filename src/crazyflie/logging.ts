@@ -123,7 +123,7 @@ export class Logging extends EventEmitter {
 			.write('int8', block.id);
 
 		for (const variable of block.variables) {
-			const type = LOGGING_TYPES[variable.type];
+			const type = LOGGING_TYPES[variable.type as keyof typeof LOGGING_TYPES];
 			packet
 				.write('int8', type << 4 | type)
 				.write('uInt8', variable.id);
@@ -155,7 +155,7 @@ export class Logging extends EventEmitter {
 		for (const variable of variables) {
 			// @TODO test if this works...
 			block.variables.push(variable);
-			const type = LOGGING_TYPES[variable.type];
+			const type = LOGGING_TYPES[variable.type as keyof typeof LOGGING_TYPES];
 			packet
 				.write('int8', type << 4 | type)
 				.write('int8', variable.id);
